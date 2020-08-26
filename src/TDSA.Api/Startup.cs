@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using TDSA.Api.Configuration;
 using TDSA.Data.Context;
+using TDSA.Data.Extensions;
 
 namespace TDSA.Api
 {
@@ -41,8 +43,10 @@ namespace TDSA.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
+            serviceProvider.GetService<TDSAContext>().CriarTabelas();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -64,10 +68,11 @@ namespace TDSA.Api
             });
 
             app.UseSwagger();
-            app.UseSwaggerUI(u=> {
+            app.UseSwaggerUI(u =>
+            {
 
                 u.SwaggerEndpoint("/swagger/v1/swagger.json", "Desafio TDSA Api V1");
-            
+
             });
         }
     }
