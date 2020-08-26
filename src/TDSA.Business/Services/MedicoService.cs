@@ -38,6 +38,10 @@ namespace TDSA.Business.Services
 
         public async Task<Medico> Atualizar(Medico medico)
         {
+            var medicoBanco = await _medicoRepository.ObterPorId(medico.Id);
+            if (medicoBanco == null)
+                _notificacador.NotificarErro("Atualizar Médico", "Id do médico inválido!");
+
             ValidarMedico(medico);
 
             if (!RemoverEspecialidades(medico, false))

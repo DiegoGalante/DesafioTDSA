@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Linq;
-using System.Threading.Tasks;
 using TDSA.Business.Interfaces;
 using TDSA.Business.Notificacoes;
 
@@ -22,7 +21,7 @@ namespace TDSA.Api.Controllers
             return !_notificador.TemNotificacao();
         }
 
-        protected ActionResult CustomResponse(object result = null)
+        protected IActionResult CustomResponse(object result = null)
         {
             if (OperacaoValida())
             {
@@ -41,7 +40,7 @@ namespace TDSA.Api.Controllers
             });
         }
 
-        protected ActionResult CustomResponse(ModelStateDictionary modelState)
+        protected IActionResult CustomResponse(ModelStateDictionary modelState)
         {
             if (!modelState.IsValid) NotificarErroModelInvalida(modelState);
             return CustomResponse();
