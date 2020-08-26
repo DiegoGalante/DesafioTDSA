@@ -1,5 +1,7 @@
 
-[Link do Desafio](https://gitlab.com/tdsasistemas/challenger/-/blob/master/desafio-backend.md)
+# [Link do Desafio](https://gitlab.com/tdsasistemas/challenger/-/blob/master/desafio-backend.md)
+
+### [Resolução do Desafio](https://github.com/DiegoGalante/DesafioTDSA/wiki)
 
 # O Desafio
 Sua tarefa é construir uma aplicação SAAS. A aplicação é um simples repositório para gerenciar médicos com seus respectivos nomes, CPF's, crm's e especialidades. Utilize um repositório Git (público, de sua preferência) para versionamento e disponibilização do código.
