@@ -1,3 +1,4 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/o03t2w5lvqpigoap/branch/master?svg=true)](https://ci.appveyor.com/project/DiegoGalante/desafiotdsa/branch/master)
 
 # [Link do Desafio](https://gitlab.com/tdsasistemas/challenger/-/blob/master/desafio-backend.md)
 
