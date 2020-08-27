@@ -8,12 +8,12 @@ namespace TDSA.Business.Validations.EspecialidadeValidation
         public EspecialidadeValidation()
         {
             RuleFor(c => c.Id)
-            .NotEmpty().WithMessage("{PropertyName} do Médico não informado");
+            .NotEmpty().WithMessage("{PropertyName} da especialidade não informado");
 
             RuleFor(x => x.Nome)
+                .NotNull()
                 .NotEmpty()
-                .NotEmpty()
-                .WithMessage("{PropertyName} não pode ser vazio ou nulo!");
+                .WithMessage("{PropertyName} da especialidade é obrigatório!");
         }
     }
 }

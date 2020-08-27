@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TDSA.Business.Interfaces;
 using TDSA.Business.Models;
 using TDSA.Business.Notificacoes;
+using TDSA.Business.Validations.EspecialidadeValidation;
 using TDSA.Business.Validations.MedicoValidation;
 
 namespace TDSA.Business.Services
@@ -25,9 +26,7 @@ namespace TDSA.Business.Services
 
         public async Task<Guid> Cadastrar(Medico medico)
         {
-            Validar(medico);
-
-            if (_notificacador.TemNotificacao())
+            if (!ValidarCadastro(medico))
                 return Guid.Empty;
 
             await _medicoRepository.Adicionar(medico);
@@ -38,11 +37,12 @@ namespace TDSA.Business.Services
 
         public async Task<Medico> Atualizar(Medico medico)
         {
-            ValidarMedico(medico);
+            if (!ValidarAtualizacao(medico))
+                return null;
 
             AtualizarDadosDoMedico(medico);
 
-            if (_notificacador.TemNotificacao())
+            if (!OperacaoValida())
                 return null;
 
             await _medicoRepository.Atualizar(medico);
@@ -105,25 +105,75 @@ namespace TDSA.Business.Services
             }
         }
 
-        public void ValidarMedico(Medico medico)
+        public bool ValidarMedico(Medico medico)
         {
             var result = new MedicoValidation().Validate(medico);
             if (!result.IsValid)
+            {
                 _notificacador.NotificarErros(result);
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool ValidarEspecialidade(Especialidade especialidade)
+        {
+            var result = new EspecialidadeValidation().Validate(especialidade);
+            if (!result.IsValid)
+            {
+                _notificacador.NotificarErros(result);
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool ValidarEspecialidades(List<Especialidade> especialidades)
+        {
+            foreach (var especialidade in especialidades)
+                if (!ValidarEspecialidade(especialidade))
+                    return false;
+
+            return true;
         }
 
 
-        private void ValidarCPFJaCadastrado(Medico medico)
+        private bool ValidarCPFJaCadastrado(Medico medico)
         {
             var result = _medicoRepository.ObterPorCPF(medico.CPF).Result;
             if (result != null)
+            {
                 _notificacador.NotificarErro(new Notificacao("CPF", "CPF já cadastrado!"));
+                return false;
+            }
+
+            return true;
         }
 
-        private void Validar(Medico medico)
+        private bool ValidarCadastro(Medico medico)
         {
-            ValidarMedico(medico);
-            ValidarCPFJaCadastrado(medico);
+            if (!ValidarMedico(medico))
+                return false;
+
+            if (!ValidarEspecialidades(medico.Especialidades))
+                return false;
+
+            if (!ValidarCPFJaCadastrado(medico))
+                return false;
+
+            return true;
+        }
+
+        private bool ValidarAtualizacao(Medico medico)
+        {
+            if (!ValidarMedico(medico))
+                return false;
+
+            if (!ValidarEspecialidades(medico.Especialidades))
+                return false;
+
+            return true;
         }
 
         private bool RemoverEspecialidades(Medico medico)
@@ -137,6 +187,11 @@ namespace TDSA.Business.Services
             medico.LimparEspecialidades();
 
             return true;
+        }
+
+        private bool OperacaoValida()
+        {
+            return !_notificacador.TemNotificacao();
         }
     }
 }
