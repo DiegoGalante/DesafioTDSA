@@ -31,7 +31,7 @@ namespace TDSA.Business.Validations.MedicoValidation
                 .WithMessage("{PropertyName} não pode ser maior que 255 caracteres!");
 
             RuleFor(x => x.CRM)
-                .NotEmpty()
+                .NotNull()
                 .NotEmpty()
                 .WithMessage("{PropertyName} é obrigatório!");
 

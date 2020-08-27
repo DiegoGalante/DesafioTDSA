@@ -33,7 +33,7 @@ namespace TDSA.Api.V1.Controllers
 
             var retornoId = await _medicoService.Cadastrar(medico);
 
-            if (!OperacaoValida() || retornoId == Guid.Empty)
+            if (!OperacaoValida())
                 return CustomResponse();
 
             return Ok(new

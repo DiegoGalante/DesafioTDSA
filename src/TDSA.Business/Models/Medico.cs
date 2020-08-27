@@ -26,7 +26,7 @@ namespace TDSA.Business.Models
 
         public void AtualizarNome(string nome)
         {
-            if (string.IsNullOrEmpty(nome))
+            if (string.IsNullOrEmpty(nome?.Trim()))
                 throw new Exception("Nome é obrigatório!");
 
             if (nome.Length >= 255)
@@ -37,16 +37,18 @@ namespace TDSA.Business.Models
 
         public void AtualizarCRM(string crm)
         {
-            if (string.IsNullOrEmpty(crm))
+            if (string.IsNullOrEmpty(crm?.Trim()))
                 throw new Exception("CRM é obrigatório!");
-
 
             CRM = crm;
         }
 
         public void AtualizarCPF(string cpf)
         {
-            if (!CpfValidacao.Validar(cpf))
+            if (string.IsNullOrEmpty(cpf?.Trim()))
+                throw new Exception("CPF inválido!");
+
+            if (!CpfValidacao.Validar(cpf.Trim()))
                 throw new Exception("CPF inválido!");
 
             CPF = cpf;
@@ -57,8 +59,10 @@ namespace TDSA.Business.Models
             if (Especialidades == null)
                 Especialidades = new List<Especialidade>();
 
-            if (especialidade == null ||
-                string.IsNullOrEmpty(especialidade.Nome))
+            if (especialidade == null)
+                throw new Exception("Especialidade é obrigatório!");
+
+            if (string.IsNullOrEmpty(especialidade.Nome?.Trim()))
                 throw new Exception("Especialidade é obrigatório!");
 
             Especialidades.Add(especialidade);

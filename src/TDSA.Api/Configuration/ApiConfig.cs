@@ -17,7 +17,6 @@ namespace TDSA.Api.Configuration
 
             services.AddVersionedApiExplorer(op =>
             {
-
                 op.GroupNameFormat = "'v'VVV";
                 op.SubstituteApiVersionInUrl = true;
 

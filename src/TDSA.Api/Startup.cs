@@ -70,9 +70,7 @@ namespace TDSA.Api
             app.UseSwagger();
             app.UseSwaggerUI(u =>
             {
-
                 u.SwaggerEndpoint("/swagger/v1/swagger.json", "Desafio TDSA Api V1");
-
             });
         }
     }
