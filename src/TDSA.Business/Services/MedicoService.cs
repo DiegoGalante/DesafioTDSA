@@ -38,23 +38,42 @@ namespace TDSA.Business.Services
 
         public async Task<Medico> Atualizar(Medico medico)
         {
-            var medicoBanco = await _medicoRepository.ObterPorId(medico.Id);
-            if (medicoBanco == null)
-                _notificacador.NotificarErro("Atualizar Médico", "Id do médico inválido!");
-
             ValidarMedico(medico);
 
-            if (!RemoverEspecialidades(medico, false))
-                _notificacador.NotificarErro("Atualizar Médico", "Não foi possível atualizar as especialidades");
+            medico = AtualizarDadosDoMedico(medico);
 
             if (_notificacador.TemNotificacao())
                 return null;
 
             await _especialidadeRepository.SaveChanges();
+            
             await _medicoRepository.Atualizar(medico);
             await _medicoRepository.SaveChanges();
 
             return medico;
+        }
+
+        private Medico AtualizarDadosDoMedico(Medico medico)
+        {
+            var medicoBanco = _medicoRepository.ObterPorId(medico.Id).Result;
+            if (medicoBanco == null)
+                _notificacador.NotificarErro("Atualizar Médico", "Id do médico inválido!");
+
+            try
+            {
+                medicoBanco.AtualizarNome(medico.Nome);
+                medicoBanco.AtualizarCRM(medico.CRM);
+                medicoBanco.AtualizarCPF(medico.CPF);
+
+                RemoverEspecialidades(medico, false);
+                medicoBanco.AdicionarEspecialidades(medico.Especialidades);
+            }
+            catch (Exception ex)
+            {
+                _notificacador.NotificarErro("Atualizar Médico", ex.Message);
+            }
+
+            return medicoBanco;
         }
 
         public async Task<IList<Medico>> Listar()
@@ -113,7 +132,10 @@ namespace TDSA.Business.Services
         {
             var especialidades = _especialidadeRepository.Listar(medico.Id).Result;
             if (especialidades == null)
+            {
+                _notificacador.NotificarErro("Atualizar Médico", "Não foi possível atualizar as especialidades");
                 return false;
+            }
 
             foreach (var especialidade in especialidades)
                 _especialidadeRepository.Remover(especialidade.Id).Wait();
