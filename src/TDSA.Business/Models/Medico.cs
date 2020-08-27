@@ -69,5 +69,10 @@ namespace TDSA.Business.Models
             foreach (var especialidade in especialidades)
                 AdicionarEspecialidade(especialidade);
         }
+
+        public void LimparEspecialidades()
+        {
+            Especialidades.Clear();
+        }
     }
 }

@@ -65,7 +65,7 @@ namespace TDSA.Business.Services
                 medicoBanco.AtualizarCRM(medico.CRM);
                 medicoBanco.AtualizarCPF(medico.CPF);
 
-                RemoverEspecialidades(medico, false);
+                RemoverEspecialidades(medicoBanco, false);
                 medicoBanco.AdicionarEspecialidades(medico.Especialidades);
             }
             catch (Exception ex)
@@ -143,6 +143,7 @@ namespace TDSA.Business.Services
             if (salvarAlteracoesNoMetodo)
                 _especialidadeRepository.SaveChanges().Wait();
 
+            medico.LimparEspecialidades();
             return true;
         }
     }
