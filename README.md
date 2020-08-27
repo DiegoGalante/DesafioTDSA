@@ -2,6 +2,8 @@
 
 # [Link do Desafio](https://gitlab.com/tdsasistemas/challenger/-/blob/master/desafio-backend.md)
 
+## [Como Rodar o Projeto](https://github.com/DiegoGalante/DesafioTDSA/wiki/Rodar-o-Projeto) :rocket:
+
 ### [Resolução do Desafio](https://github.com/DiegoGalante/DesafioTDSA/wiki) :heart_eyes: :memo:
 
 # O Desafio
