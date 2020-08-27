@@ -40,13 +40,11 @@ namespace TDSA.Business.Services
         {
             ValidarMedico(medico);
 
-            medico = AtualizarDadosDoMedico(medico);
+            AtualizarDadosDoMedico(medico);
 
             if (_notificacador.TemNotificacao())
                 return null;
 
-            await _especialidadeRepository.SaveChanges();
-            
             await _medicoRepository.Atualizar(medico);
             await _medicoRepository.SaveChanges();
 
@@ -65,7 +63,7 @@ namespace TDSA.Business.Services
                 medicoBanco.AtualizarCRM(medico.CRM);
                 medicoBanco.AtualizarCPF(medico.CPF);
 
-                RemoverEspecialidades(medicoBanco, false);
+                RemoverEspecialidades(medicoBanco);
                 medicoBanco.AdicionarEspecialidades(medico.Especialidades);
             }
             catch (Exception ex)
@@ -128,22 +126,16 @@ namespace TDSA.Business.Services
             ValidarCPFJaCadastrado(medico);
         }
 
-        private bool RemoverEspecialidades(Medico medico, bool salvarAlteracoesNoMetodo = true)
+        private bool RemoverEspecialidades(Medico medico)
         {
-            var especialidades = _especialidadeRepository.Listar(medico.Id).Result;
-            if (especialidades == null)
-            {
-                _notificacador.NotificarErro("Atualizar Médico", "Não foi possível atualizar as especialidades");
-                return false;
-            }
+            var especialidades = medico.Especialidades;
 
             foreach (var especialidade in especialidades)
                 _especialidadeRepository.Remover(especialidade.Id).Wait();
 
-            if (salvarAlteracoesNoMetodo)
-                _especialidadeRepository.SaveChanges().Wait();
-
+            _especialidadeRepository.SaveChanges().Wait();
             medico.LimparEspecialidades();
+
             return true;
         }
     }

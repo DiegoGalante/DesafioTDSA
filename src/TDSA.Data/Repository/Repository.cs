@@ -22,13 +22,11 @@ namespace TDSA.Data.Repository
         public async Task Adicionar(TEntity entity)
         {
             await DbSet.AddAsync(entity);
-            //await SaveChanges();
         }
 
         public virtual async Task Atualizar(TEntity entity)
         {
             DbSet.Update(entity);
-            //await SaveChanges();
         }
 
         public virtual async Task<List<TEntity>> Listar()
@@ -46,7 +44,6 @@ namespace TDSA.Data.Repository
         {
             TEntity entity = await ObterPorId(id);
             DbSet.Remove(entity);
-            //await SaveChanges();
         }
 
         public async Task<int> SaveChanges()
