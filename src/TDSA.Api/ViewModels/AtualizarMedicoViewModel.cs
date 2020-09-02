@@ -6,6 +6,7 @@ namespace TDSA.Api.ViewModels
 {
     public class AtualizarMedicoViewModel
     {
+        [Key]
         [Required(ErrorMessage ="Campo Id é requerido para a atualização!")]
         public Guid Id { get; set; }
         public string Nome { get; set; }
