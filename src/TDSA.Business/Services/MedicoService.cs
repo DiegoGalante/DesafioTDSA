@@ -40,17 +40,12 @@ namespace TDSA.Business.Services
             if (!ValidarAtualizacao(medico))
                 return null;
 
-            AtualizarDadosDoMedico(medico);
+            medico = AtualizarDadosDoMedico(medico);
 
             if (!OperacaoValida())
                 return null;
 
-            /* Não é necessario utilizar o _medicoRepository.Atualizar(medico)
-             * pois está sendo utilizado o changetracker do entityFramework já que
-             * o AtualizarDadosDoMedico retorna o médico que veio do banco.
-             */
-
-            //await _medicoRepository.Atualizar(medico);
+            await _medicoRepository.Atualizar(medico);
             await _medicoRepository.SaveChanges();
 
             return medico;
@@ -188,7 +183,7 @@ namespace TDSA.Business.Services
             foreach (var especialidade in especialidades)
                 _especialidadeRepository.Remover(especialidade.Id).Wait();
 
-            //_especialidadeRepository.SaveChanges().Wait();
+            _especialidadeRepository.SaveChanges().Wait();
             medico.LimparEspecialidades();
 
             return true;
