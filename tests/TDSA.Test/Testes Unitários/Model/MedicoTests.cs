@@ -87,7 +87,7 @@ namespace TDSA.Test.Testes_Unitários.Model
             _medico.CRM.Should().Be(crm);
         }
 
-        [Theory(DisplayName = "MedicoService - AtualizarCRM - Crm deve ser inválido por ser vazio")]
+        [Theory(DisplayName = "Medico - AtualizarCRM - Crm deve ser inválido por ser vazio")]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData(null)]

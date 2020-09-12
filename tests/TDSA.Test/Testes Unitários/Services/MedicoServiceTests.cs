@@ -1,9 +1,7 @@
 ﻿using Bogus;
 using Bogus.Extensions.Brazil;
-using FluentAssertions;
 using Moq;
 using Moq.AutoMock;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using TDSA.Business.Interfaces;

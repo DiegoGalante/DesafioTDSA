@@ -44,7 +44,7 @@ namespace TDSA.Business.Validations.MedicoValidation
                 .WithMessage("{PropertyName} inválido!");
         }
 
-        private bool ValidaQuantidadeMinimaDeEspecialidades(List<Especialidade> especialidades)
+        private bool ValidaQuantidadeMinimaDeEspecialidades(ICollection<Especialidade> especialidades)
         {
             if (especialidades == null)
                 return false;

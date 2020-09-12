@@ -2,11 +2,11 @@
 
 namespace TDSA.Api.ViewModels
 {
-    public class CadastrarMedicoViewModel
+    public struct CadastrarMedicoViewModel
     {
         public string Nome { get; set; }
         public string Cpf { get; set; }
         public string Crm { get; set; }
-        public List<string> Especialidades { get; set; }
+        public IEnumerable<string> Especialidades { get; set; }
     }
 }
