@@ -1,7 +1,4 @@
 ﻿using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TDSA.Business.Validations;
 using Xunit;
 
@@ -9,6 +6,7 @@ namespace TDSA.Test.Testes_Unitários.Validations
 {
     public class UtilsTests
     {
+        [Trait("Utils", "Utils Testes")]
         [Theory(DisplayName = "Utils - ApenasNumeros - Deve Ser Valido")]
         [InlineData("123.456.789-09")]
         [InlineData("123.456.78909")]
@@ -28,6 +26,7 @@ namespace TDSA.Test.Testes_Unitários.Validations
 
         }
 
+        [Trait("Utils", "Utils Testes")]
         [Theory(DisplayName = "Utils - ApenasNumeros - Deve Ser Invalido")]
         [InlineData("  ")]
         [InlineData("-")]
@@ -43,5 +42,3 @@ namespace TDSA.Test.Testes_Unitários.Validations
 
     }
 }
-
-//402.254.568-26

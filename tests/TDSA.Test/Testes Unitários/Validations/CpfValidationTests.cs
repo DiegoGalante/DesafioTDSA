@@ -1,7 +1,4 @@
 ﻿using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TDSA.Business.Validations;
 using Xunit;
 
@@ -9,7 +6,7 @@ namespace TDSA.Test.Testes_Unitários.Validations
 {
     public class CpfValidationTests
     {
-
+        [Trait("Validação", "Validação Cpf Testes")]
         [Theory(DisplayName = "CpfValidation - Validar - Deve Ser Valido")]
         [InlineData("652.472.120-96")]
         [InlineData("65247212096")]
@@ -20,6 +17,7 @@ namespace TDSA.Test.Testes_Unitários.Validations
             ehValido.Should().BeTrue();
         }
 
+        [Trait("Validação", "Validação Cpf Testes")]
         [Theory(DisplayName = "CpfValidation - Validar - Deve Ser Invalido")]
         [InlineData("")]
         [InlineData("abc_")]
