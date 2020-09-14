@@ -17,7 +17,6 @@ namespace TDSA.Api.Configuration
             services.AddScoped<IMedicoService, MedicoService>();
 
             services.AddScoped<IMedicoRepository, MedicoRepository>();
-            services.AddScoped<IEspecialidadeRepository, EspecialidadeRepository>();
 
             return services;
         }

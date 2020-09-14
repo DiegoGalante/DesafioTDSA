@@ -16,12 +16,23 @@ namespace TDSA.Data.Repository
         { }
 
 
-        public override async Task Atualizar(Medico medico)
+        public override void Atualizar(Medico medico)
         {
+            SincronizarEspecialidades(medico);
             Db.Medicos.Update(medico);
-            Db.Especialidades.AddRange(medico.Especialidades);
         }
 
+        private void SincronizarEspecialidades(Medico medico)
+        {
+            var especialidadesNoBanco = Db.Especialidades.Where(x => x.MedicoId == medico.Id).ToList();
+
+            Db.Especialidades.AddRange(medico.Especialidades.Where(x => !especialidadesNoBanco.Any(y => y.MedicoId == x.MedicoId &&
+                                                                                                   y.Id == x.Id)));
+            Db.Especialidades.UpdateRange(medico.Especialidades.Where(x => especialidadesNoBanco.Any(y => y.MedicoId == x.MedicoId &&
+                                                                                        y.Id == x.Id)));
+            Db.Especialidades.RemoveRange(especialidadesNoBanco.Where(x => !medico.Especialidades.Any(y => y.MedicoId == x.MedicoId &&
+                                                                                         y.Id == x.Id)));
+        }
 
         public override async Task<Medico> ObterPorId(Guid id)
         {
@@ -36,7 +47,6 @@ namespace TDSA.Data.Repository
             return await Db.Medicos.AsNoTracking()
                 .Include(m => m.Especialidades)
                 .ToListAsync();
-
         }
 
         public async Task<List<Medico>> Listar(string especialidade)
