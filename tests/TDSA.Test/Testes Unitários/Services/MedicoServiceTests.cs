@@ -29,9 +29,8 @@ namespace TDSA.Test.Testes_Unitários.Services
             //Arrange
             var mockNotificador = new Mock<INotificador>();
             var medicoRepo = new Mock<IMedicoRepository>();
-            var especialidadeRepo = new Mock<IEspecialidadeRepository>();
 
-            var medicoService = new MedicoService(medicoRepo.Object, especialidadeRepo.Object, mockNotificador.Object);
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
             var medico = _medicoServiceTestsFixture.GerarMedicoValido();
 
             //Act
@@ -49,13 +48,51 @@ namespace TDSA.Test.Testes_Unitários.Services
             //Arrange
             var mockNotificador = new Mock<INotificador>();
             var medicoRepo = new Mock<IMedicoRepository>();
-            var especialidadeRepo = new Mock<IEspecialidadeRepository>();
 
-            var medicoService = new MedicoService(medicoRepo.Object, especialidadeRepo.Object, mockNotificador.Object);
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
             var medico = _medicoServiceTestsFixture.GerarMedicoInvalido();
 
             //Act
             var result = medicoService.ValidarMedico(medico);
+
+            //Assert
+            mockNotificador.Verify(r => r.NotificarErros(It.IsAny<FluentValidation.Results.ValidationResult>()), Times.AtLeastOnce);
+            Assert.False(result);
+        }
+
+
+        [Fact(DisplayName = "MedicoService - ValidarEspecialidade - Deve Ser Válida")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarEspecialidade_DeveSerValido()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var especialidade = _medicoServiceTestsFixture.GerarEspecialidadeValida();
+
+            //Act
+            var result = medicoService.ValidarEspecialidade(especialidade);
+
+            //Assert
+            mockNotificador.Verify(r => r.NotificarErros(It.IsAny<FluentValidation.Results.ValidationResult>()), Times.Never);
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "MedicoService - ValidarEspecialidade - Deve Ser Inválida")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarEspecialidade_DeveSerInvalida()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var especialidade = _medicoServiceTestsFixture.GerarEspecialidadeInvalida();
+
+            //Act
+            var result = medicoService.ValidarEspecialidade(especialidade);
 
             //Assert
             mockNotificador.Verify(r => r.NotificarErros(It.IsAny<FluentValidation.Results.ValidationResult>()), Times.AtLeastOnce);
@@ -80,6 +117,125 @@ namespace TDSA.Test.Testes_Unitários.Services
             Assert.Equal(medico.Id, result);
         }
 
+        [Fact(DisplayName = "MedicoService - ValidarCPFJaCadastrado - Deve Ser Verdadeiro")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarCPFJaCadastrado_DeveSerVerdadeiro()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            //Act
+            var result = medicoService.ValidarCPFJaCadastrado(medico);
+
+            //Assert
+            medicoRepo.Verify(r => r.ObterPorCPF(It.IsAny<string>()), Times.Once);
+            mockNotificador.Verify(r => r.NotificarErros(It.IsAny<FluentValidation.Results.ValidationResult>()), Times.Never);
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "MedicoService - ValidarCPFJaCadastrado - Deve Ser Falso")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarCPFJaCadastrado_DeveSerFalse()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            //Act
+            /*Preciso ver como faz essa validação*/
+            var result = medicoService.ValidarCPFJaCadastrado(medico);
+
+            //Assert
+            medicoRepo.Verify(r => r.ObterPorCPF(It.IsAny<string>()), Times.Once);
+            mockNotificador.Verify(r => r.NotificarErros(It.IsAny<FluentValidation.Results.ValidationResult>()), Times.Once);
+            //Assert.False(result);
+
+            /*FORÇANDO O ERRO PRA PERCEBER QUE PRECISO ARRUMAR*/
+            Assert.True(result);
+        }
+
+
+        [Fact(DisplayName = "MedicoService - ValidarCadastro - Deve Ser Válido")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarCadastro_DeveSerValido()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            //Act
+            var result = medicoService.ValidarCadastro(medico);
+
+            //Assert
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "MedicoService - ValidarCadastro - Deve Ser Invalido")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarCadastro_DeveSerInvalido()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var medico = _medicoServiceTestsFixture.GerarMedicoInvalido();
+
+            //Act
+            var result = medicoService.ValidarCadastro(medico);
+
+            //Assert
+            Assert.False(result);
+        }
+
+
+        [Fact(DisplayName = "MedicoService - ValidarAtualizacao - Deve Ser Verdadeiro")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarAtualizacao_DeveSerVerdadeiro()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            //Act
+            var result = medicoService.ValidarAtualizacao(medico);
+
+            //Assert
+            Assert.True(result);
+        }
+
+
+        [Fact(DisplayName = "MedicoService - ValidarAtualizacao - Deve Ser Falso")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarAtualizacao_DeveSerFalso()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var medico = _medicoServiceTestsFixture.GerarMedicoInvalido();
+
+            //Act
+            var result = medicoService.ValidarAtualizacao(medico);
+
+            //Assert
+            Assert.False(result);
+        }
+
         [Fact(DisplayName = "Medico Deve Retornar Guid Vazio")]
         [Trait("Services", "MedicoService Testes")]
         public async Task MedicoService_Cadastrar_NaoDeveSerCadastrado()
@@ -87,9 +243,8 @@ namespace TDSA.Test.Testes_Unitários.Services
             //Arrange
             var mockNotificador = new Mock<INotificador>();
             var medicoRepo = new Mock<IMedicoRepository>();
-            var especialidadeRepo = new Mock<IEspecialidadeRepository>();
 
-            var medicoService = new MedicoService(medicoRepo.Object, especialidadeRepo.Object, mockNotificador.Object);
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
             var medico = _medicoServiceTestsFixture.GerarMedicoInvalido();
 
             //Act
@@ -101,6 +256,7 @@ namespace TDSA.Test.Testes_Unitários.Services
             //result.Should().BeEmpty();
             Assert.Equal(Guid.Empty, result);
         }
+
 
     }
 }

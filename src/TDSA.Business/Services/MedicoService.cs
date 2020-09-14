@@ -1,8 +1,5 @@
-﻿using Bogus;
-using Bogus.Extensions.Brazil;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TDSA.Business.Interfaces;
 using TDSA.Business.Models;
@@ -41,6 +38,8 @@ namespace TDSA.Business.Services
 
             medico = AtualizarDadosDoMedico(medico);
 
+            var teste1 = OperacaoValida();
+
             if (!OperacaoValida())
                 return null;
 
@@ -54,7 +53,10 @@ namespace TDSA.Business.Services
         {
             var medicoBanco = _medicoRepository.ObterPorId(medico.Id).Result;
             if (medicoBanco == null)
+            {
                 _notificacador.NotificarErro("Atualizar Médico", "Id do médico inválido!");
+                return null;
+            }
 
             try
             {
@@ -68,6 +70,7 @@ namespace TDSA.Business.Services
             catch (Exception ex)
             {
                 _notificacador.NotificarErro("Atualizar Médico", ex.Message);
+                return null;
             }
 
             return medicoBanco;
@@ -138,7 +141,7 @@ namespace TDSA.Business.Services
         }
 
 
-        private bool ValidarCPFJaCadastrado(Medico medico)
+        public bool ValidarCPFJaCadastrado(Medico medico)
         {
             var result = _medicoRepository.ObterPorCPF(medico.CPF).Result;
             if (result != null)
@@ -150,7 +153,7 @@ namespace TDSA.Business.Services
             return true;
         }
 
-        private bool ValidarCadastro(Medico medico)
+        public bool ValidarCadastro(Medico medico)
         {
             if (!ValidarMedico(medico))
                 return false;
@@ -164,7 +167,7 @@ namespace TDSA.Business.Services
             return true;
         }
 
-        private bool ValidarAtualizacao(Medico medico)
+        public bool ValidarAtualizacao(Medico medico)
         {
             if (!ValidarMedico(medico))
                 return false;
@@ -175,35 +178,35 @@ namespace TDSA.Business.Services
             return true;
         }
 
-        private bool OperacaoValida()
+        public bool OperacaoValida()
         {
             return !_notificacador.TemNotificacao();
         }
 
 
-        private static IList<Medico> GerarMedicos(int quantidade = 1)
-        {
-            var _fakerMedico = new Faker("pt_BR");
+        //private static IList<Medico> GerarMedicos(int quantidade = 1)
+        //{
+        //    var _fakerMedico = new Faker("pt_BR");
 
 
-            var medico = new Faker<Medico>("pt_BR").CustomInstantiator((f) => new Medico(_fakerMedico.Random.Guid(),
-                                                      _fakerMedico.Person.FirstName,
-                                                      _fakerMedico.Person.Cpf(true),
-                                                      _fakerMedico.Random.String(10, 'a', 'z'),
-                                                      GerarEspecialidades(_fakerMedico.Random.Int(1, 100))));
+        //    var medico = new Faker<Medico>("pt_BR").CustomInstantiator((f) => new Medico(_fakerMedico.Random.Guid(),
+        //                                              _fakerMedico.Person.FirstName,
+        //                                              _fakerMedico.Person.Cpf(true),
+        //                                              _fakerMedico.Random.String(10, 'a', 'z'),
+        //                                              GerarEspecialidades(_fakerMedico.Random.Int(1, 100))));
 
-            return medico.Generate(quantidade);
-        }
+        //    return medico.Generate(quantidade);
+        //}
 
 
-        private static ICollection<Especialidade> GerarEspecialidades(int quantidade = 1)
-        {
-            var _faker = new Faker("pt_BR");
+        //private static ICollection<Especialidade> GerarEspecialidades(int quantidade = 1)
+        //{
+        //    var _faker = new Faker("pt_BR");
 
-            var especialidade = new Faker<Especialidade>("pt_BR").CustomInstantiator((f) => new Especialidade(_faker.Random.Guid(),
-                                                                                                              _faker.Random.String(5, 'a', 'z')));
+        //    var especialidade = new Faker<Especialidade>("pt_BR").CustomInstantiator((f) => new Especialidade(_faker.Random.Guid(),
+        //                                                                                                      _faker.Random.String(5, 'a', 'z')));
 
-            return especialidade.Generate(quantidade);
-        }
+        //    return especialidade.Generate(quantidade);
+        //}
     }
 }

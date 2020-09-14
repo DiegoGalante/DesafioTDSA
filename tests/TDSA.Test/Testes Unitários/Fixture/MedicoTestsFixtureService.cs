@@ -68,6 +68,20 @@ namespace TDSA.Test.Testes_Unitários.Fixture
             return cliente;
         }
 
+        public Especialidade GerarEspecialidadeValida()
+        {
+            return GerarEspecialidades(1).FirstOrDefault();
+        }
+
+        public Especialidade GerarEspecialidadeInvalida()
+        {
+            var especialidade = new Faker<Especialidade>("pt_BR")
+                .CustomInstantiator((f) => new Especialidade(Guid.Empty,
+                                                             string.Empty));
+
+            return especialidade;
+        }
+
         public void Dispose()
         {
 
