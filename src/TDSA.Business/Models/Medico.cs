@@ -48,7 +48,7 @@ namespace TDSA.Business.Models
             if (string.IsNullOrEmpty(cpf?.Trim()))
                 throw new Exception("CPF inválido!");
 
-            if (!Cpf.ValidarCPF(cpf.Trim()))
+            if (!CpfValidacao.Validar(cpf.Trim()))
                 throw new Exception("CPF inválido!");
 
             CPF = cpf;
@@ -60,10 +60,10 @@ namespace TDSA.Business.Models
                 Especialidades = new List<Especialidade>();
 
             if (especialidade == null)
-                throw new Exception("Especialidade é obrigatório!");
+                throw new Exception("Especialidade é obrigatória!");
 
             if (string.IsNullOrEmpty(especialidade.Nome?.Trim()))
-                throw new Exception("Especialidade é obrigatório!");
+                throw new Exception("Especialidade é obrigatória!");
 
             Especialidades.Add(especialidade);
         }

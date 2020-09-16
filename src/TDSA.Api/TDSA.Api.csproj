@@ -22,5 +22,4 @@
     <ProjectReference Include="..\TDSA.Data\TDSA.Data.csproj" />
   </ItemGroup>
 
-
 </Project>

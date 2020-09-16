@@ -1,13 +1,11 @@
 ﻿using Bogus;
 using Bogus.Extensions.Brazil;
-using FluentAssertions;
 using Moq;
 using Moq.AutoMock;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TDSA.Business.Interfaces;
-using TDSA.Business.Notificacoes;
 using TDSA.Business.Services;
 using TDSA.Test.Testes_Unitários.Fixture;
 using Xunit;
@@ -195,6 +193,46 @@ namespace TDSA.Test.Testes_Unitários.Services
         }
 
 
+        [Fact(DisplayName = "Deve ser Inválido por possuir especialidades inválidas")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarCadastro_DeveSerInvalidoPorEspecialidadesInvalidas()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var medico = _medicoServiceTestsFixture.GerarMedicoValidoComEspeclidadeInvalida();
+
+            //Act
+            var result = medicoService.ValidarCadastro(medico);
+
+            //Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "Deve ser Inválido pelo CPF já estar cadastrado na base")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarCadastro_DeveSerInvalidoPorCPFJaExistir()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var cpf = new Faker().Person.Cpf(true);
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+            medico.AtualizarCPF(cpf);
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorCPF(cpf))
+                      .Returns(_medicoServiceTestsFixture.GerarMedicoComCpfFixo(cpf));
+
+            //Act
+            var result = medicoService.ValidarCadastro(medico);
+
+            //Assert
+            Assert.False(result);
+        }
+
         [Fact(DisplayName = "MedicoService - ValidarAtualizacao - Deve Ser Verdadeiro")]
         [Trait("Services", "MedicoService Testes")]
         public void MedicoService_ValidarAtualizacao_DeveSerVerdadeiro()
@@ -224,6 +262,24 @@ namespace TDSA.Test.Testes_Unitários.Services
 
             var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
             var medico = _medicoServiceTestsFixture.GerarMedicoInvalido();
+
+            //Act
+            var result = medicoService.ValidarAtualizacao(medico);
+
+            //Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "MedicoService - ValidarAtualizacao - Deve Ser Falso Por Possuir Especialidades Invalidas")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarAtualizacao_DeveSerFalsoPorEspecialidadeInvalida()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var medico = _medicoServiceTestsFixture.GerarMedicoValidoComEspeclidadeInvalida();
 
             //Act
             var result = medicoService.ValidarAtualizacao(medico);
@@ -269,7 +325,7 @@ namespace TDSA.Test.Testes_Unitários.Services
 
             //Assert
             medicoRepo.Verify(r => r.ObterPorCPF(It.IsAny<string>()), Times.Once);
-            mockNotificador.Verify(r => r.NotificarErro(It.IsAny<Notificacao>()), Times.Never);
+            mockNotificador.Verify(r => r.NotificarErro(It.IsAny<TDSA.Business.Notificacoes.Notificacao>()), Times.Never);
             Assert.True(result);
         }
 
@@ -294,7 +350,7 @@ namespace TDSA.Test.Testes_Unitários.Services
 
             //Assert
             mocker.GetMock<IMedicoRepository>().Verify(r => r.ObterPorCPF(It.IsAny<string>()), Times.Once);
-            mocker.GetMock<INotificador>().Verify(r => r.NotificarErro(It.IsAny<Notificacao>()), Times.Once);
+            mocker.GetMock<INotificador>().Verify(r => r.NotificarErro(It.IsAny<TDSA.Business.Notificacoes.Notificacao>()), Times.Once);
             Assert.False(result);
         }
 

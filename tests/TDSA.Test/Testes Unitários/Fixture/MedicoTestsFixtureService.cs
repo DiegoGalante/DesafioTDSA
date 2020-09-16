@@ -21,6 +21,34 @@ namespace TDSA.Test.Testes_Unitários.Fixture
             return GerarMedicos(1).FirstOrDefault();
         }
 
+        public Medico GerarMedicoValidoComEspeclidadeInvalida()
+        {
+            var genero = new Faker().PickRandom<Name.Gender>();
+
+            var medico = new Faker<Medico>("pt_BR")
+                .CustomInstantiator((f) => new Medico(f.Random.Guid(),
+                                                      f.Name.FirstName(genero),
+                                                      f.Person.Cpf(true),
+                                                      f.Random.String(10, 'a', 'z'),
+                                                      (List<Especialidade>)GerarEspecialidadesInvalidas(f.Random.Int(1, 10))));
+
+            return medico;
+        }
+
+        public Medico GerarMedicoValidoComEspeclidadeNula()
+        {
+            var genero = new Faker().PickRandom<Name.Gender>();
+
+            var medico = new Faker<Medico>("pt_BR")
+                .CustomInstantiator((f) => new Medico(f.Random.Guid(),
+                                                      f.Name.FirstName(genero),
+                                                      f.Person.Cpf(true),
+                                                      f.Random.String(10, 'a', 'z'),
+                                                      null));
+
+            return medico;
+        }
+
 
         public async Task<List<Medico>> ObterMedicosVariados(bool vazio = false)
         {

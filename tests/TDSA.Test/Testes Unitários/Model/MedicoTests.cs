@@ -155,6 +155,21 @@ namespace TDSA.Test.Testes_Unitários.Model
         }
 
         [Trait("Model", "Medico Testes")]
+        [Fact(DisplayName = "Medico - AtualizarEspecialidade - Especialidade deve ser válida mesmo com a propriedade Especialidades instânciada nula")]
+        public void Medico_AtualizarEspecialidade_EspecialidadesDeveSerValia()
+        {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValidoComEspeclidadeNula();
+            var especialidade = _medicoServiceTestsFixture.GerarEspecialidadeValida();
+
+            //Act
+            medico.AdicionarEspecialidade(especialidade);
+
+            //Assert
+            medico.Especialidades.Should().Contain(especialidade);
+        }
+
+        [Trait("Model", "Medico Testes")]
         [Fact(DisplayName = "Medico - AtualizarEspecialidades - Especialidades devem ser adicionadas")]
         public void Medico_AtualizarEspecialidades_EspecialidadesDeveSerAdicionadas()
         {
@@ -185,7 +200,7 @@ namespace TDSA.Test.Testes_Unitários.Model
             var validacao = Assert.Throws<Exception>(() => medico.AdicionarEspecialidade(especialidade)).Message;
 
             //Assert
-            validacao.Should().Contain("Especialidade é obrigatório!");
+            validacao.Should().Contain("Especialidade é obrigatória!");
         }
 
         [Trait("Model", "Medico Testes")]

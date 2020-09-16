@@ -30,27 +30,27 @@ REM PING -n 10 127.0.0.1>nul
 REM exit /b %errorlevel%
 
 :RunOpenCoverUnitTestMetrics
-"C:\Users\bibos\.nuget\packages\opencover\4.7.922\tools\OpenCover.Console.exe" ^
+"%~dp0packages\opencover\4.7.922\tools\OpenCover.Console.exe" ^
 -register:user ^
--target:"C:\Users\bibos\.nuget\packages\xunit.runner.console\2.4.1\tools\net472\xunit.console.x86.exe"  ^
+-target:"C:/Program Files/dotnet/dotnet.exe" 
 -targetargs:"%~dp0TDSA.Test\bin\Debug\netcoreapp3.1\TDSA.Test.dll -noshadow" ^
--filter:"+[TDSA.Test*]* -[TDSA.Business]* " ^
--output:"%~dp0GeneratedReports\TDSA.Tests.xml"
-PING -n 10 127.0.0.1>nul
+-targetargs:test -filter:"+[TDSA.Business*]* -[TDSA.Test*]*" 
+-output:"%~dp0GeneratedReports\TDSA_Cobertura.xml" -oldstyle
+PING -n 5 127.0.0.1>nul
 exit /b %errorlevel%
 
 
 :RunReportGeneratorOutput
 PING -n 10 127.0.0.1>nul
-"C:\Users\bibos\.nuget\packages\reportgenerator\4.5.6\tools\netcoreapp3.0\ReportGenerator.exe" 
--reports:"%~dp0GeneratedReports\TDSA.Tests.xml" ^
+"%~dp0packages\reportgenerator\4.5.6\tools\netcoreapp3.0\ReportGenerator.exe" 
+-reports:"%~dp0GeneratedReports\TDSA_Cobertura.xml" ^
 -targetdir:"%~dp0GeneratedReports" ^
 exit /b %errorlevel%
 
 :RunLaunchReport
-PING -n 10 127.0.0.1>nul
+PING -n 5 127.0.0.1>nul
 start "report" "%~dp0GeneratedReports\index.htm" 
-PING -n 10 127.0.0.1>nul
+PING -n 5 127.0.0.1>nul
 exit /b %errorlevel%
 
 pause					

@@ -1,0 +1,14 @@
+image: Visual Studio 2019
+
+before_build:
+- nuget restore
+- choco install opencover.portable
+- choco install codecov
+
+build:
+  project: Desafio_Back-End_TDSA_Sistemas.sln
+  verbosity: minimal
+
+test_script:
+- OpenCover.Console.exe -register:user -target:"C:/Program Files/dotnet/dotnet.exe" -targetargs:test -filter:"+[TDSA.Business*]* -[TDSA.Test*]*" -output:".\TDSA_Cobertura.xml" -oldstyle
+- codecov -f "MyProject_coverage.xml
