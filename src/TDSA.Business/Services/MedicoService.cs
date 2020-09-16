@@ -36,9 +36,19 @@ namespace TDSA.Business.Services
             if (!ValidarAtualizacao(medico))
                 return null;
 
-            medico = AtualizarDadosDoMedico(medico);
+            var medicoBanco = _medicoRepository.ObterPorId(medico.Id).Result;
+            if (medicoBanco == null)
+            {
+                _notificacador.NotificarErro("Atualizar Médico", "Id do médico inválido!");
+                return null;
+            }
 
-            var teste1 = OperacaoValida();
+            medicoBanco.AtualizarNome(medico.Nome);
+            medicoBanco.AtualizarCRM(medico.CRM);
+            medicoBanco.AtualizarCPF(medico.CPF);
+
+            medicoBanco.Especialidades.Clear();
+            medicoBanco.AdicionarEspecialidades(medico.Especialidades);
 
             if (!OperacaoValida())
                 return null;
@@ -47,33 +57,6 @@ namespace TDSA.Business.Services
             await _medicoRepository.SaveChanges();
 
             return medico;
-        }
-
-        private Medico AtualizarDadosDoMedico(Medico medico)
-        {
-            var medicoBanco = _medicoRepository.ObterPorId(medico.Id).Result;
-            if (medicoBanco == null)
-            {
-                _notificacador.NotificarErro("Atualizar Médico", "Id do médico inválido!");
-                return null;
-            }
-
-            try
-            {
-                medicoBanco.AtualizarNome(medico.Nome);
-                medicoBanco.AtualizarCRM(medico.CRM);
-                medicoBanco.AtualizarCPF(medico.CPF);
-
-                medicoBanco.Especialidades.Clear();
-                medicoBanco.AdicionarEspecialidades(medico.Especialidades);
-            }
-            catch (Exception ex)
-            {
-                _notificacador.NotificarErro("Atualizar Médico", ex.Message);
-                return null;
-            }
-
-            return medicoBanco;
         }
 
         public async Task<IList<Medico>> Listar()

@@ -4,6 +4,7 @@ using Bogus.Extensions.Brazil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TDSA.Business.Models;
 using Xunit;
 
@@ -21,14 +22,16 @@ namespace TDSA.Test.Testes_Unitários.Fixture
         }
 
 
-        public IEnumerable<Medico> ObterMedicosVariados()
+        public async Task<List<Medico>> ObterMedicosVariados(bool vazio = false)
         {
             var medicos = new List<Medico>();
+            if (vazio)
+                return medicos;
 
             medicos.AddRange(GerarMedicos(new Faker().Random.Int(1, 100)).ToList());
-
             return medicos;
         }
+
 
         public IEnumerable<Medico> GerarMedicos(int quantidade)
         {
@@ -40,11 +43,48 @@ namespace TDSA.Test.Testes_Unitários.Fixture
                                                       f.Person.Cpf(true),
                                                       f.Random.String(10, 'a', 'z'),
                                                       (List<Especialidade>)GerarEspecialidades(f.Random.Int(1, 10))));
-            //.RuleFor(c => c.Email, (f, c) =>
-            //      f.Internet.Email(c.Nome.ToLower(), c.Sobrenome.ToLower()));
 
             return medicos.Generate(quantidade);
         }
+
+        public async Task<Medico> GerarMedicoComCpfFixo(string cpf)
+        {
+            var genero = new Faker().PickRandom<Name.Gender>();
+
+            var medico = new Faker<Medico>("pt_BR")
+                .CustomInstantiator((f) => new Medico(f.Random.Guid(),
+                                                      f.Name.FirstName(genero),
+                                                      cpf,
+                                                      f.Random.String(10, 'a', 'z'),
+                                                      (List<Especialidade>)GerarEspecialidades(f.Random.Int(1, 10))));
+
+            return medico;
+        }
+
+        public async Task<Medico> ObterPorId(Medico medico = null)
+        {
+            return medico;
+        }
+
+        public async Task<List<Medico>> Listar(string especialidade, bool encontrar)
+        {
+            var medicos = ObterMedicosVariados().Result;
+
+            if (!encontrar)
+                return medicos;
+
+            var random = new Faker().Random.Int(0, medicos.Count);
+
+            var index = medicos.FindIndex(random, m => !m.Especialidades.Select(c => c.Nome).Contains(especialidade));
+            var medico = medicos.GetRange(index, 1).FirstOrDefault();
+
+            var novaEspecialidade = new Especialidade(Guid.NewGuid(), especialidade);
+            medico.AdicionarEspecialidade(novaEspecialidade);
+
+            return medicos.Where(m => m.Especialidades.Contains(novaEspecialidade)).ToList();
+        }
+
+
 
         public IEnumerable<Especialidade> GerarEspecialidades(int quantidade)
         {
@@ -80,6 +120,11 @@ namespace TDSA.Test.Testes_Unitários.Fixture
                                                              string.Empty));
 
             return especialidade;
+        }
+
+        public bool OperacaoValida(bool comNotificacao = false)
+        {
+            return comNotificacao;
         }
 
         public void Dispose()

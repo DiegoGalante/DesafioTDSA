@@ -1,10 +1,13 @@
 ﻿using Bogus;
+using Bogus.Extensions.Brazil;
 using FluentAssertions;
 using Moq;
 using Moq.AutoMock;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using TDSA.Business.Interfaces;
+using TDSA.Business.Notificacoes;
 using TDSA.Business.Services;
 using TDSA.Test.Testes_Unitários.Fixture;
 using Xunit;
@@ -117,51 +120,6 @@ namespace TDSA.Test.Testes_Unitários.Services
             Assert.Equal(medico.Id, result);
         }
 
-        [Fact(DisplayName = "MedicoService - ValidarCPFJaCadastrado - Deve Ser Verdadeiro")]
-        [Trait("Services", "MedicoService Testes")]
-        public void MedicoService_ValidarCPFJaCadastrado_DeveSerVerdadeiro()
-        {
-            //Arrange
-            var mockNotificador = new Mock<INotificador>();
-            var medicoRepo = new Mock<IMedicoRepository>();
-
-            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
-            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
-
-            //Act
-            var result = medicoService.ValidarCPFJaCadastrado(medico);
-
-            //Assert
-            medicoRepo.Verify(r => r.ObterPorCPF(It.IsAny<string>()), Times.Once);
-            mockNotificador.Verify(r => r.NotificarErros(It.IsAny<FluentValidation.Results.ValidationResult>()), Times.Never);
-            Assert.True(result);
-        }
-
-        [Fact(DisplayName = "MedicoService - ValidarCPFJaCadastrado - Deve Ser Falso")]
-        [Trait("Services", "MedicoService Testes")]
-        public void MedicoService_ValidarCPFJaCadastrado_DeveSerFalse()
-        {
-            //Arrange
-            var mockNotificador = new Mock<INotificador>();
-            var medicoRepo = new Mock<IMedicoRepository>();
-
-            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
-            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
-
-            //Act
-            /*Preciso ver como faz essa validação*/
-            var result = medicoService.ValidarCPFJaCadastrado(medico);
-
-            //Assert
-            medicoRepo.Verify(r => r.ObterPorCPF(It.IsAny<string>()), Times.Once);
-            mockNotificador.Verify(r => r.NotificarErros(It.IsAny<FluentValidation.Results.ValidationResult>()), Times.Once);
-            //Assert.False(result);
-
-            /*FORÇANDO O ERRO PRA PERCEBER QUE PRECISO ARRUMAR*/
-            Assert.True(result);
-        }
-
-
         [Fact(DisplayName = "MedicoService - ValidarCadastro - Deve Ser Válido")]
         [Trait("Services", "MedicoService Testes")]
         public void MedicoService_ValidarCadastro_DeveSerValido()
@@ -257,6 +215,295 @@ namespace TDSA.Test.Testes_Unitários.Services
             Assert.Equal(Guid.Empty, result);
         }
 
+        [Fact(DisplayName = "MedicoService - ValidarCPFJaCadastrado - Deve Ser Verdadeiro")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarCPFJaCadastrado_DeveSerVerdadeiro()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            //Act
+            var result = medicoService.ValidarCPFJaCadastrado(medico);
+
+            //Assert
+            medicoRepo.Verify(r => r.ObterPorCPF(It.IsAny<string>()), Times.Once);
+            mockNotificador.Verify(r => r.NotificarErro(It.IsAny<Notificacao>()), Times.Never);
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "MedicoService - ValidarCPFJaCadastrado - Deve Ser Falso")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarCPFJaCadastrado_DeveSerFalse()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var cpf = new Faker().Person.Cpf(true);
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorCPF(cpf))
+                      .Returns(_medicoServiceTestsFixture.GerarMedicoComCpfFixo(cpf));
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+            medico.AtualizarCPF(cpf);
+
+            //Act
+            var result = medicoService.ValidarCPFJaCadastrado(medico);
+
+            //Assert
+            mocker.GetMock<IMedicoRepository>().Verify(r => r.ObterPorCPF(It.IsAny<string>()), Times.Once);
+            mocker.GetMock<INotificador>().Verify(r => r.NotificarErro(It.IsAny<Notificacao>()), Times.Once);
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "Medico Deve Ser Atualizado")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_Atualizar_DeveSerAtualizado()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
+                      .Returns(_medicoServiceTestsFixture.ObterPorId(medico));
+
+            //Act
+            var result = await medicoService.Atualizar(medico);
+
+            //Assert
+            mocker.GetMock<IMedicoRepository>().Verify(r => r.Atualizar(medico), Times.Once);
+            mocker.GetMock<IMedicoRepository>().Verify(r => r.SaveChanges(), Times.Once);
+            Assert.Equal(medico, result);
+        }
+
+        [Fact(DisplayName = "Medico Não Deve Passar na Validação por ser inválido")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_Atualizar_NaoDevePassarNaValidacao()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoInvalido();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
+                      .Returns(_medicoServiceTestsFixture.ObterPorId(medico));
+
+            //Act
+            var result = await medicoService.Atualizar(medico);
+
+            //Assert
+            mocker.GetMock<IMedicoRepository>().Verify(r => r.Atualizar(medico), Times.Never);
+            mocker.GetMock<IMedicoRepository>().Verify(r => r.SaveChanges(), Times.Never);
+            Assert.Null(result);
+        }
+
+        [Fact(DisplayName = "Medico Não Deve Atualizar Por Não Encontrar No Banco")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_Atualizar_NaoDeveAtualizarPorNaoEncontrarNoBanco()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
+                      .Returns(_medicoServiceTestsFixture.ObterPorId());
+
+            //Act
+            var result = await medicoService.Atualizar(medico);
+
+            //Assert
+            mocker.GetMock<INotificador>().Verify(r => r.NotificarErro(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            mocker.GetMock<IMedicoRepository>().Verify(r => r.Atualizar(medico), Times.Never);
+            mocker.GetMock<IMedicoRepository>().Verify(r => r.SaveChanges(), Times.Never);
+            Assert.Null(result);
+        }
+
+        [Fact(DisplayName = "Medico Não Deve Atualizar Por Possuir Notificação")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_Atualizar_NaoDeveAtualizarPorPossuirNoticacao()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
+                      .Returns(_medicoServiceTestsFixture.ObterPorId(medico));
+
+            mocker.GetMock<INotificador>().Setup(m => m.TemNotificacao())
+                      .Returns(_medicoServiceTestsFixture.OperacaoValida(true));
+
+            //Act
+            var result = await medicoService.Atualizar(medico);
+
+            //Assert
+            mocker.GetMock<IMedicoRepository>().Verify(r => r.Atualizar(medico), Times.Never);
+            mocker.GetMock<IMedicoRepository>().Verify(r => r.SaveChanges(), Times.Never);
+            Assert.Null(result);
+        }
+
+        [Fact(DisplayName = "Deve Possuir Notificação")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_Atualizar_DevePossuirNoticacao()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            mocker.GetMock<INotificador>().Setup(m => m.TemNotificacao())
+                      .Returns(_medicoServiceTestsFixture.OperacaoValida(true));
+
+            //Act
+            var result = medicoService.OperacaoValida();
+
+            //Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "Não Deve Possuir Notificação")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_Atualizar_NaoDevePossuirNoticacao()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            mocker.GetMock<INotificador>().Setup(m => m.TemNotificacao())
+                      .Returns(_medicoServiceTestsFixture.OperacaoValida(false));
+
+            //Act
+            var result = medicoService.OperacaoValida();
+
+            //Assert
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "Deve Obter Pelo Id")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_ObterPorId_DeveObterPeloId()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
+                      .Returns(_medicoServiceTestsFixture.ObterPorId(medico));
+
+            //Act
+            var result = await medicoService.ObterPorId(medico.Id);
+
+            //Assert
+            Assert.Equal(medico, result);
+        }
+
+        [Fact(DisplayName = "Deve RetornarNulo")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_ObterPorId_DeveRetornarNulo()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
+                      .Returns(_medicoServiceTestsFixture.ObterPorId());
+
+            //Act
+            var result = await medicoService.ObterPorId(medico.Id);
+
+            //Assert
+            Assert.Null(result);
+        }
+
+        [Fact(DisplayName = "Deve Obter a Lista de Médicos")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_Listar_DeveObterListaDeMedicos()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.Listar())
+                      .Returns(_medicoServiceTestsFixture.ObterMedicosVariados());
+
+            //Act
+            var result = await medicoService.Listar();
+
+            //Assert
+            Assert.True(result.Any());
+        }
+
+        [Fact(DisplayName = "Deve Retornar Lista Vazia")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_Listar_DeveRetornarListaVazia()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.Listar())
+                      .Returns(_medicoServiceTestsFixture.ObterMedicosVariados(true));
+
+            //Act
+            var result = await medicoService.Listar();
+
+            //Assert
+            Assert.True(!result.Any());
+        }
+
+        [Fact(DisplayName = "Deve Retornar Lista Com Especialidade Pesquisada")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_Listar_DeveRetornarListaComEspecialidadePesquisada()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var especialidade = new Faker("pt_BR").Random.String(200, 'a', 'z');
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.Listar(especialidade))
+                      .Returns(_medicoServiceTestsFixture.Listar(especialidade, true));
+
+            //Act
+            var result = await medicoService.Listar(especialidade);
+
+            //Assert
+            Assert.True(result.Any());
+            Assert.True(result.Where(c => c.Especialidades.Select(n => n.Nome).Contains(especialidade)).ToList().Count == result.Count);
+        }
+
+        [Fact(DisplayName = "Deve Retornar Lista Vazia")]
+        [Trait("Services", "MedicoService Testes")]
+        public async Task MedicoService_Listar_DeveRetornarListaVaziaComBaseNaEspecialidadePesquisada()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var especialidade = new Faker("pt_BR").Random.String(200, 'a', 'z');
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.Listar(especialidade))
+                      .Returns(_medicoServiceTestsFixture.Listar(especialidade, false));
+
+            //Act
+            var result = await medicoService.Listar(especialidade);
+
+            //Assert
+            Assert.DoesNotContain(result, c => c.Especialidades.Select(n => n.Nome).Contains(especialidade));
+        }
 
     }
 }
