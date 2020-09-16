@@ -204,6 +204,20 @@ namespace TDSA.Test.Testes_Unitários.Model
         }
 
         [Trait("Model", "Medico Testes")]
+        [Fact(DisplayName = "Medico - AtualizarEspecialidade - Especialidades deve ser inválido por ser Vazio Ou Nulo")]
+        public void Medico_AtualizarEspecialidade_EspecialidadesDeveSerInvalidoValidoPorSerNullo()
+        {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            //Act
+            var validacao = Assert.Throws<Exception>(() => medico.AdicionarEspecialidade(null)).Message;
+
+            //Assert
+            validacao.Should().Contain("Especialidade é obrigatória!");
+        }
+
+        [Trait("Model", "Medico Testes")]
         [Fact(DisplayName = "Medico - LimparEspecialidades - Especialidades deve ser ter a lista esvaziada")]
         public void Medico_LimparEspecialidades_EspecialidadesDeveAListaEsvaziada()
         {

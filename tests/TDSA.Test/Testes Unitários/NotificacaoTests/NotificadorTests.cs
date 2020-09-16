@@ -2,14 +2,22 @@
 using FluentAssertions;
 using Moq.AutoMock;
 using System.Linq;
+using TDSA.Business.Interfaces;
 using TDSA.Business.Notificacoes;
+using TDSA.Test.Testes_Unitários.Fixture;
 using Xunit;
 
 namespace TDSA.Test.Testes_Unitários.NotificacaoTests
 {
+    [Collection(nameof(NotificadorTestsFixtureCollection))]
     public class NotificadorTests
     {
+        readonly NotificadorTestsFixture _notificacaoTestsFixture;
 
+        public NotificadorTests(NotificadorTestsFixture notificacaoTestsFixture)
+        {
+            _notificacaoTestsFixture = notificacaoTestsFixture;
+        }
 
         [Fact(DisplayName = "NotificarErro deve adicionar a Notificacao")]
         [Trait("Services", "Notificador Testes")]
@@ -104,6 +112,63 @@ namespace TDSA.Test.Testes_Unitários.NotificacaoTests
             Assert.True(notificador.Notificacoes.Count() == validationResult.Errors.Count);
         }
 
-       
+        [Fact(DisplayName = "Deve Retornar Notificacoes")]
+        [Trait("Services", "Notificador Testes")]
+        public void MedicoService_ObterNotificacoes_DeveRetornarNotificacoes()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var notificador = mocker.CreateInstance<Notificador>();
+
+            var erros = new Faker<string>("pt_BR")
+                .CustomInstantiator((f) => f.Random.String(10, 'a', 'z'))
+                .Generate(10);
+
+            notificador.NotificarErro(erros);
+
+            //Act
+            var notificacoes = notificador.ObterNotificacoes();
+
+            //Assert
+            Assert.True(notificacoes.Any());
+        }
+
+        [Fact(DisplayName = "Deve Possuir Notificacoes")]
+        [Trait("Services", "Notificador Testes")]
+        public void MedicoService_ObterNotificacoes_DevePossuirNotificacoes()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var notificador = mocker.CreateInstance<Notificador>();
+            var erros = new Faker<string>("pt_BR")
+                .CustomInstantiator((f) => f.Random.String(10, 'a', 'z'))
+                .Generate(10);
+
+            notificador.NotificarErro(erros);
+
+            //Act
+            var result = notificador.TemNotificacao();
+
+            //Assert
+            Assert.True(result);
+        }
+
+
+        [Fact(DisplayName = "Não Deve Possuir Notificacoes")]
+        [Trait("Services", "Notificador Testes")]
+        public void MedicoService_ObterNotificacoes_NaoDevePossuirNotificacoes()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var notificador = mocker.CreateInstance<Notificador>();
+
+            //Act
+            var result = notificador.TemNotificacao();
+
+            //Assert
+            Assert.False(result);
+        }
+
+
     }
 }
