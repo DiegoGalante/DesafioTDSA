@@ -51,9 +51,9 @@ namespace TDSA.Api.V1.Controllers
             var especialidades = MontaEspecialidades(medicoViewModel.Especialidades);
             var medico = new Medico(medicoViewModel.Id, medicoViewModel.Nome, medicoViewModel.Cpf, medicoViewModel.Crm, especialidades);
 
-            var retorno = await _medicoService.Atualizar(medico);
+            await _medicoService.Atualizar(medico);
 
-            if (!OperacaoValida() || retorno == null)
+            if (!OperacaoValida())
                 return CustomResponse();
 
             var viewModel = MontaMedicoViewModel(medico);
@@ -106,9 +106,9 @@ namespace TDSA.Api.V1.Controllers
 
 
         [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Excluir(Guid id)
+        public IActionResult Excluir(Guid id)
         {
-            await _medicoService.Remover(id);
+            _medicoService.Remover(id);
 
             if (!OperacaoValida())
                 return CustomResponse();
@@ -119,7 +119,7 @@ namespace TDSA.Api.V1.Controllers
         private MedicoViewModel MontaMedicoViewModel(Medico medico)
         {
             if (medico == null)
-                return null;
+                return new MedicoViewModel();
 
             return new MedicoViewModel()
             {
@@ -132,7 +132,7 @@ namespace TDSA.Api.V1.Controllers
 
         }
 
-        private List<Especialidade> MontaEspecialidades(List<string> especialidadesViewModel)
+        private ICollection<Especialidade> MontaEspecialidades(IEnumerable<string> especialidadesViewModel)
         {
             var especialidades = new List<Especialidade>();
 

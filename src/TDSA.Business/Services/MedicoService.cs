@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TDSA.Business.Interfaces;
 using TDSA.Business.Models;
@@ -14,14 +13,11 @@ namespace TDSA.Business.Services
     {
         private readonly INotificador _notificacador;
         private readonly IMedicoRepository _medicoRepository;
-        private readonly IEspecialidadeRepository _especialidadeRepository;
         public MedicoService(IMedicoRepository medicoRepository,
-                             IEspecialidadeRepository especialidadeRepository,
                              INotificador notificacador)
         {
             _medicoRepository = medicoRepository;
             _notificacador = notificacador;
-            _especialidadeRepository = especialidadeRepository;
         }
 
         public async Task<Guid> Cadastrar(Medico medico)
@@ -40,38 +36,27 @@ namespace TDSA.Business.Services
             if (!ValidarAtualizacao(medico))
                 return null;
 
-            medico = AtualizarDadosDoMedico(medico);
+            var medicoBanco = _medicoRepository.ObterPorId(medico.Id).Result;
+            if (medicoBanco == null)
+            {
+                _notificacador.NotificarErro("Atualizar Médico", "Id do médico inválido!");
+                return null;
+            }
+
+            medicoBanco.AtualizarNome(medico.Nome);
+            medicoBanco.AtualizarCRM(medico.CRM);
+            medicoBanco.AtualizarCPF(medico.CPF);
+
+            medicoBanco.Especialidades.Clear();
+            medicoBanco.AdicionarEspecialidades(medico.Especialidades);
 
             if (!OperacaoValida())
                 return null;
 
-            await _medicoRepository.Atualizar(medico);
+            _medicoRepository.Atualizar(medico);
             await _medicoRepository.SaveChanges();
 
             return medico;
-        }
-
-        private Medico AtualizarDadosDoMedico(Medico medico)
-        {
-            var medicoBanco = _medicoRepository.ObterPorId(medico.Id).Result;
-            if (medicoBanco == null)
-                _notificacador.NotificarErro("Atualizar Médico", "Id do médico inválido!");
-
-            try
-            {
-                medicoBanco.AtualizarNome(medico.Nome);
-                medicoBanco.AtualizarCRM(medico.CRM);
-                medicoBanco.AtualizarCPF(medico.CPF);
-
-                RemoverEspecialidades(medicoBanco);
-                medicoBanco.AdicionarEspecialidades(medico.Especialidades);
-            }
-            catch (Exception ex)
-            {
-                _notificacador.NotificarErro("Atualizar Médico", ex.Message);
-            }
-
-            return medicoBanco;
         }
 
         public async Task<IList<Medico>> Listar()
@@ -89,20 +74,23 @@ namespace TDSA.Business.Services
             return await _medicoRepository.ObterPorId(id);
         }
 
-        public async Task Remover(Guid id)
+        public void Remover(Guid id)
         {
             if (id == Guid.Empty)
-                _notificacador.NotificarErro("Id Inválido para remover!");
-
-            var medico = await _medicoRepository.ObterPorId(id);
-            if (medico == null)
-                _notificacador.NotificarErro("Remover", "Médico não encontrado ou já removido!");
-
-            if (!_notificacador.TemNotificacao())
             {
-                await _medicoRepository.Remover(id);
-                await _medicoRepository.SaveChanges();
+                _notificacador.NotificarErro("Id Inválido para remover!");
+                return;
             }
+
+            var medico = _medicoRepository.ObterPorId(id).Result;
+            if (medico == null)
+            {
+                _notificacador.NotificarErro("Remover", "Médico não encontrado ou já removido!");
+                return;
+            }
+
+            _medicoRepository.Remover(id).Wait();
+            _medicoRepository.SaveChanges().Wait();
         }
 
         public bool ValidarMedico(Medico medico)
@@ -129,7 +117,7 @@ namespace TDSA.Business.Services
             return true;
         }
 
-        public bool ValidarEspecialidades(List<Especialidade> especialidades)
+        public bool ValidarEspecialidades(ICollection<Especialidade> especialidades)
         {
             foreach (var especialidade in especialidades)
                 if (!ValidarEspecialidade(especialidade))
@@ -139,7 +127,7 @@ namespace TDSA.Business.Services
         }
 
 
-        private bool ValidarCPFJaCadastrado(Medico medico)
+        public bool ValidarCPFJaCadastrado(Medico medico)
         {
             var result = _medicoRepository.ObterPorCPF(medico.CPF).Result;
             if (result != null)
@@ -151,7 +139,7 @@ namespace TDSA.Business.Services
             return true;
         }
 
-        private bool ValidarCadastro(Medico medico)
+        public bool ValidarCadastro(Medico medico)
         {
             if (!ValidarMedico(medico))
                 return false;
@@ -165,7 +153,7 @@ namespace TDSA.Business.Services
             return true;
         }
 
-        private bool ValidarAtualizacao(Medico medico)
+        public bool ValidarAtualizacao(Medico medico)
         {
             if (!ValidarMedico(medico))
                 return false;
@@ -176,22 +164,35 @@ namespace TDSA.Business.Services
             return true;
         }
 
-        private bool RemoverEspecialidades(Medico medico)
-        {
-            var especialidades = medico.Especialidades;
-
-            foreach (var especialidade in especialidades)
-                _especialidadeRepository.Remover(especialidade.Id).Wait();
-
-            _especialidadeRepository.SaveChanges().Wait();
-            medico.LimparEspecialidades();
-
-            return true;
-        }
-
-        private bool OperacaoValida()
+        public bool OperacaoValida()
         {
             return !_notificacador.TemNotificacao();
         }
+
+
+        //private static IList<Medico> GerarMedicos(int quantidade = 1)
+        //{
+        //    var _fakerMedico = new Faker("pt_BR");
+
+
+        //    var medico = new Faker<Medico>("pt_BR").CustomInstantiator((f) => new Medico(_fakerMedico.Random.Guid(),
+        //                                              _fakerMedico.Person.FirstName,
+        //                                              _fakerMedico.Person.Cpf(true),
+        //                                              _fakerMedico.Random.String(10, 'a', 'z'),
+        //                                              GerarEspecialidades(_fakerMedico.Random.Int(1, 100))));
+
+        //    return medico.Generate(quantidade);
+        //}
+
+
+        //private static ICollection<Especialidade> GerarEspecialidades(int quantidade = 1)
+        //{
+        //    var _faker = new Faker("pt_BR");
+
+        //    var especialidade = new Faker<Especialidade>("pt_BR").CustomInstantiator((f) => new Especialidade(_faker.Random.Guid(),
+        //                                                                                                      _faker.Random.String(5, 'a', 'z')));
+
+        //    return especialidade.Generate(quantidade);
+        //}
     }
 }

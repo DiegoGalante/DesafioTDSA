@@ -14,6 +14,6 @@ namespace TDSA.Business.Interfaces
 
         Task<Guid> Cadastrar(Medico medico);
         Task<Medico> Atualizar(Medico medico);
-        Task Remover(Guid id);
+        void Remover(Guid id);
     }
 }

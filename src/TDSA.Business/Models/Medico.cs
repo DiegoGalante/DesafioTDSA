@@ -10,13 +10,13 @@ namespace TDSA.Business.Models
         public string Nome { get; private set; }
         public string CPF { get; private set; }
         public string CRM { get; private set; }
-        public List<Especialidade> Especialidades { get; private set; }
+        public ICollection<Especialidade> Especialidades { get; private set; }
 
         private Medico() : base(Guid.Empty)
         {
 
         }
-        public Medico(Guid id, string nome, string cpf, string crm, List<Especialidade> especialidades) : base(id)
+        public Medico(Guid id, string nome, string cpf, string crm, ICollection<Especialidade> especialidades) : base(id)
         {
             Nome = nome;
             CPF = cpf;
@@ -60,15 +60,15 @@ namespace TDSA.Business.Models
                 Especialidades = new List<Especialidade>();
 
             if (especialidade == null)
-                throw new Exception("Especialidade é obrigatório!");
+                throw new Exception("Especialidade é obrigatória!");
 
             if (string.IsNullOrEmpty(especialidade.Nome?.Trim()))
-                throw new Exception("Especialidade é obrigatório!");
+                throw new Exception("Especialidade é obrigatória!");
 
             Especialidades.Add(especialidade);
         }
 
-        public void AdicionarEspecialidades(List<Especialidade> especialidades)
+        public void AdicionarEspecialidades(ICollection<Especialidade> especialidades)
         {
             foreach (var especialidade in especialidades)
                 AdicionarEspecialidade(especialidade);

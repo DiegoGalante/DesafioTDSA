@@ -24,15 +24,19 @@ namespace TDSA.Data.Repository
             await DbSet.AddAsync(entity);
         }
 
-        public virtual async Task Atualizar(TEntity entity)
+        public async Task Adicionar(IList<TEntity> entity)
+        {
+            await DbSet.AddRangeAsync(entity);
+        }
+
+        public virtual void Atualizar(TEntity entity)
         {
             DbSet.Update(entity);
         }
 
         public virtual async Task<List<TEntity>> Listar()
         {
-            return await DbSet.AsNoTracking()
-                              .ToListAsync();
+            return await DbSet.ToListAsync();
         }
 
         public virtual async Task<TEntity> ObterPorId(Guid id)

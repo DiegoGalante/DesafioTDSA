@@ -1,77 +1,74 @@
 ﻿using Bogus;
-using Bogus.Extensions.Brazil;
 using FluentAssertions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using TDSA.Business.Models;
+using TDSA.Test.Testes_Unitários.Fixture;
 using Xunit;
 
 namespace TDSA.Test.Testes_Unitários.Model
 {
+    [Collection(nameof(MedicoBogusCollection))]
     public class MedicoTests
     {
-        private Faker _faker;
-        private Medico _medico;
+        readonly MedicoTestsFixtureService _medicoServiceTestsFixture;
+        private readonly Faker _faker;
 
-        public MedicoTests()
+        public MedicoTests(MedicoTestsFixtureService medicoServiceTestsFixture)
         {
+            _medicoServiceTestsFixture = medicoServiceTestsFixture;
+
             _faker = new Faker("pt_BR");
-            var especialidades = new List<Especialidade>();
-
-            for (int i = 0; i < _faker.Random.Int(1, 5); i++)
-                especialidades.Add(new Especialidade(_faker.Random.Guid(), _faker.Random.String(5, 'a', 'z')));
-
-
-            _medico = new Faker<Medico>("pt_BR")
-                .CustomInstantiator((f) => new Medico(_faker.Random.Guid(),
-                                                      _faker.Person.FirstName,
-                                                      _faker.Person.Cpf(true),
-                                                      _faker.Random.String(10, 'a', 'z'),
-                                                      especialidades))
-                .Generate(1)
-                .First();
         }
 
+        [Trait("Model", "Medico Testes")]
         [Fact(DisplayName = "Medico - AtualizarNome - Nome deve ser atualizado")]
         public void Medico_AtualizarNome_NomeDeveSerAtualizado()
         {
             //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
             var novoNome = _faker.Person.FirstName;
 
             //Act
-            _medico.AtualizarNome(novoNome);
+            medico.AtualizarNome(novoNome);
 
             //Assert
-            _medico.Nome.Should().Be(novoNome);
+            medico.Nome.Should().Be(novoNome);
         }
 
+        [Trait("Model", "Medico Testes")]
         [Theory(DisplayName = "MedicoService - AtualizarNome - Nome deve ser inválido por ser vazio ou nulo")]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData(null)]
         public void Medico_AtualizarNome_NomeDeveSerInValidoPorSerVazioOuNulo(string nome)
         {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
             //Act
-            var validacao = Assert.Throws<Exception>(() => _medico.AtualizarNome(nome)).Message;
+            var validacao = Assert.Throws<Exception>(() => medico.AtualizarNome(nome)).Message;
 
             //Assert
             validacao.Should().Contain("Nome é obrigatório!");
         }
 
+        [Trait("Model", "Medico Testes")]
         [Fact(DisplayName = "Medico - AtualizarNome - Nome deve ser inválido pelo tamanho")]
         public void Medico_AtualizarNome_NomeDeveSerInValidoPeloTamanho()
         {
             //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
             var nomeInvalido = _faker.Random.String(256, 'a', 'z');
 
             //Act
-            var validacao = Assert.Throws<Exception>(() => _medico.AtualizarNome(nomeInvalido)).Message;
+            var validacao = Assert.Throws<Exception>(() => medico.AtualizarNome(nomeInvalido)).Message;
 
             //Assert
             validacao.Should().Contain("Nome não pode ser maior que 255 caracteres!");
         }
 
+        [Trait("Model", "Medico Testes")]
         [Theory(DisplayName = "Medico - AtualizarCRM - Crm deve ser válido")]
         [InlineData("1223-SC")]
         [InlineData("teste")]
@@ -80,26 +77,34 @@ namespace TDSA.Test.Testes_Unitários.Model
         [InlineData(" aa")]
         public void Medico_AtualizarCRM_CrmDeveSerValido(string crm)
         {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
             //Act
-            _medico.AtualizarCRM(crm);
+            medico.AtualizarCRM(crm);
 
             //Assert
-            _medico.CRM.Should().Be(crm);
+            medico.CRM.Should().Be(crm);
         }
 
+        [Trait("Model", "Medico Testes")]
         [Theory(DisplayName = "MedicoService - AtualizarCRM - Crm deve ser inválido por ser vazio")]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData(null)]
         public void Medico_AtualizarCRM_CrmDeveSerInValidoPorSerVazio(string crm)
         {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
             //Act
-            var validacao = Assert.Throws<Exception>(() => _medico.AtualizarCRM(crm)).Message;
+            var validacao = Assert.Throws<Exception>(() => medico.AtualizarCRM(crm)).Message;
 
             //Assert
             validacao.Should().Contain("CRM é obrigatório!");
         }
 
+        [Trait("Model", "Medico Testes")]
         [Theory(DisplayName = "Medico - AtualizarCPF - Cpf deve ser inválido")]
         [InlineData("238.677.850-9")]
         [InlineData("238.677.850-900")]
@@ -109,90 +114,123 @@ namespace TDSA.Test.Testes_Unitários.Model
         [InlineData(null)]
         public void Medico_AtualizarCPF_CpfDeveSerInValido(string cpf)
         {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
             //Act
-            var validacao = Assert.Throws<Exception>(() => _medico.AtualizarCPF(cpf)).Message;
+            var validacao = Assert.Throws<Exception>(() => medico.AtualizarCPF(cpf)).Message;
 
             //Assert
             validacao.Should().Contain("CPF inválido!");
         }
 
+        [Trait("Model", "Medico Testes")]
         [Theory(DisplayName = "Medico - AtualizarCPF - Cpf deve ser válido")]
         [InlineData("238.677.850-90")]
         [InlineData("23867785090")]
         public void Medico_AtualizarCPF_CrmDeveSerValido(string cpf)
         {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
             //Act
-            _medico.AtualizarCPF(cpf);
+            medico.AtualizarCPF(cpf);
 
             //Assert
-            _medico.CPF.Should().Be(cpf);
+            medico.CPF.Should().Be(cpf);
         }
 
+        [Trait("Model", "Medico Testes")]
         [Fact(DisplayName = "Medico - AtualizarEspecialidade - Especialidades deve ser válido")]
         public void Medico_AtualizarEspecialidade_EspecialidadesDeveSerValido()
         {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
             var especialidade = new Especialidade(_faker.Random.Guid(), _faker.Random.String(5, 'a', 'z'));
             //Act
-            _medico.AdicionarEspecialidade(especialidade);
+            medico.AdicionarEspecialidade(especialidade);
 
             //Assert
-            _medico.Especialidades.Should().Contain(especialidade);
+            medico.Especialidades.Should().Contain(especialidade);
         }
 
+        [Trait("Model", "Medico Testes")]
+        [Fact(DisplayName = "Medico - AtualizarEspecialidade - Especialidade deve ser válida mesmo com a propriedade Especialidades instânciada nula")]
+        public void Medico_AtualizarEspecialidade_EspecialidadesDeveSerValia()
+        {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValidoComEspeclidadeNula();
+            var especialidade = _medicoServiceTestsFixture.GerarEspecialidadeValida();
+
+            //Act
+            medico.AdicionarEspecialidade(especialidade);
+
+            //Assert
+            medico.Especialidades.Should().Contain(especialidade);
+        }
+
+        [Trait("Model", "Medico Testes")]
         [Fact(DisplayName = "Medico - AtualizarEspecialidades - Especialidades devem ser adicionadas")]
         public void Medico_AtualizarEspecialidades_EspecialidadesDeveSerAdicionadas()
         {
-            _medico.LimparEspecialidades();
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+            medico.LimparEspecialidades();
 
-            var especialidades = new Faker<Especialidade>("pt_BR")
-                                        .CustomInstantiator((f) => new Especialidade(_faker.Random.Guid(), _faker.Random.String(5, 'a', 'z')))
-                                        .Generate(5);
-
+            var especialidades = _medicoServiceTestsFixture.GerarEspecialidades(_faker.Random.Int(1, 50)).ToList();
 
             //Act
-            _medico.AdicionarEspecialidades(especialidades);
+            medico.AdicionarEspecialidades(especialidades);
 
             //Assert
-            _medico.Especialidades.Should().HaveCount(especialidades.Count());
+            medico.Especialidades.Should().HaveCount(especialidades.Count());
         }
 
+        [Trait("Model", "Medico Testes")]
         [Theory(DisplayName = "Medico - AtualizarEspecialidade - Especialidades deve ser inválido por ser Vazio Ou Nulo")]
         [InlineData("")]
         [InlineData(null)]
         public void Medico_AtualizarEspecialidade_EspecialidadesDeveSerInvalidoValidoPorSerVazioOuNullo(string nome)
         {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
             var especialidade = new Especialidade(_faker.Random.Guid(), nome);
 
             //Act
-            var validacao = Assert.Throws<Exception>(() => _medico.AdicionarEspecialidade(especialidade)).Message;
+            var validacao = Assert.Throws<Exception>(() => medico.AdicionarEspecialidade(especialidade)).Message;
 
             //Assert
-            validacao.Should().Contain("Especialidade é obrigatório!");
+            validacao.Should().Contain("Especialidade é obrigatória!");
         }
 
-        [Fact(DisplayName = "Medico - AtualizarEspecialidade - Especialidades deve ser invalido por ser nulo")]
-        public void Medico_AtualizarEspecialidade_EspecialidadesDeveSerInvalidoValidoPorSerNulo()
+        [Trait("Model", "Medico Testes")]
+        [Fact(DisplayName = "Medico - AtualizarEspecialidade - Especialidades deve ser inválido por ser Vazio Ou Nulo")]
+        public void Medico_AtualizarEspecialidade_EspecialidadesDeveSerInvalidoValidoPorSerNullo()
         {
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
             //Act
-            var validacao = Assert.Throws<Exception>(() => _medico.AdicionarEspecialidade(null)).Message;
+            var validacao = Assert.Throws<Exception>(() => medico.AdicionarEspecialidade(null)).Message;
 
             //Assert
-            validacao.Should().Contain("Especialidade é obrigatório!");
+            validacao.Should().Contain("Especialidade é obrigatória!");
         }
 
+        [Trait("Model", "Medico Testes")]
         [Fact(DisplayName = "Medico - LimparEspecialidades - Especialidades deve ser ter a lista esvaziada")]
         public void Medico_LimparEspecialidades_EspecialidadesDeveAListaEsvaziada()
         {
-            var especialidades = new Faker<Especialidade>("pt_BR")
-                                        .CustomInstantiator((f) => new Especialidade(_faker.Random.Guid(), _faker.Random.String(5, 'a', 'z')))
-                                        .Generate(5);
-
+            //Arrange
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+            var especialidades = _medicoServiceTestsFixture.GerarEspecialidades(_faker.Random.Int(1, 15)).ToList();
 
             //Act
-            _medico.AdicionarEspecialidades(especialidades);
-            _medico.LimparEspecialidades();
+            medico.AdicionarEspecialidades(especialidades);
+            medico.LimparEspecialidades();
 
-            _medico.Especialidades.Should().HaveCount(0);
+            //Assert
+            medico.Especialidades.Should().HaveCount(0);
         }
     }
 
