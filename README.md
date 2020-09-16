@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/o03t2w5lvqpigoap/branch/dev?svg=true)](https://ci.appveyor.com/project/DiegoGalante/desafiotdsa/branch/dev)
+[![Build status](https://ci.appveyor.com/api/projects/status/o03t2w5lvqpigoap/branch/dev?svg=true)](https://ci.appveyor.com/project/DiegoGalante/desafiotdsa/branch/dev) [![codecov](https://codecov.io/gh/DiegoGalante/DesafioTDSA/branch/dev/graph/badge.svg)](https://codecov.io/gh/DiegoGalante/DesafioTDSA) *
 
 # [Link do Desafio](https://gitlab.com/tdsasistemas/challenger/-/blob/master/desafio-backend.md)
 
