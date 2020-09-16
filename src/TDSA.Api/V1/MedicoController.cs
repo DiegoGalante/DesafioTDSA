@@ -106,9 +106,9 @@ namespace TDSA.Api.V1.Controllers
 
 
         [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Excluir(Guid id)
+        public IActionResult Excluir(Guid id)
         {
-            await _medicoService.Remover(id);
+            _medicoService.Remover(id);
 
             if (!OperacaoValida())
                 return CustomResponse();

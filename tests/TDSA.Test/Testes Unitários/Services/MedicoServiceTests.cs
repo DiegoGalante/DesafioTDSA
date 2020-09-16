@@ -66,7 +66,7 @@ namespace TDSA.Test.Testes_Unitários.Services
 
         [Fact(DisplayName = "MedicoService - ValidarEspecialidade - Deve Ser Válida")]
         [Trait("Services", "MedicoService Testes")]
-        public void MedicoService_ValidarEspecialidade_DeveSerValido()
+        public void MedicoService_ValidarEspecialidade_DeveSerValida()
         {
             //Arrange
             var mockNotificador = new Mock<INotificador>();
@@ -82,6 +82,7 @@ namespace TDSA.Test.Testes_Unitários.Services
             mockNotificador.Verify(r => r.NotificarErros(It.IsAny<FluentValidation.Results.ValidationResult>()), Times.Never);
             Assert.True(result);
         }
+
 
         [Fact(DisplayName = "MedicoService - ValidarEspecialidade - Deve Ser Inválida")]
         [Trait("Services", "MedicoService Testes")]
@@ -99,6 +100,43 @@ namespace TDSA.Test.Testes_Unitários.Services
 
             //Assert
             mockNotificador.Verify(r => r.NotificarErros(It.IsAny<FluentValidation.Results.ValidationResult>()), Times.AtLeastOnce);
+            Assert.False(result);
+        }
+
+
+        [Fact(DisplayName = "MedicoService - ValidarEspecialidades - Devem Ser Válidas")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarEspecialidades_DevemSerValidas()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var especialidades = _medicoServiceTestsFixture.GerarEspecialidades(10);
+
+            //Act
+            var result = medicoService.ValidarEspecialidades(especialidades);
+
+            //Assert
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "MedicoService - ValidarEspecialidades - Devem Ser Inválidas")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_ValidarEspecialidades_DevemSerInvalidas()
+        {
+            //Arrange
+            var mockNotificador = new Mock<INotificador>();
+            var medicoRepo = new Mock<IMedicoRepository>();
+
+            var medicoService = new MedicoService(medicoRepo.Object, mockNotificador.Object);
+            var especialidades = _medicoServiceTestsFixture.GerarEspecialidadesVariadas();
+
+            //Act
+            var result = medicoService.ValidarEspecialidades(especialidades);
+
+            //Assert
             Assert.False(result);
         }
 
@@ -289,11 +327,7 @@ namespace TDSA.Test.Testes_Unitários.Services
             //Arrange
             var mocker = new AutoMocker();
             var medicoService = mocker.CreateInstance<MedicoService>();
-
             var medico = _medicoServiceTestsFixture.GerarMedicoInvalido();
-
-            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
-                      .Returns(_medicoServiceTestsFixture.ObterPorId(medico));
 
             //Act
             var result = await medicoService.Atualizar(medico);
@@ -354,7 +388,7 @@ namespace TDSA.Test.Testes_Unitários.Services
 
         [Fact(DisplayName = "Deve Possuir Notificação")]
         [Trait("Services", "MedicoService Testes")]
-        public void MedicoService_Atualizar_DevePossuirNoticacao()
+        public void MedicoService_OperacaoValida_DevePossuirNoticacao()
         {
             //Arrange
             var mocker = new AutoMocker();
@@ -372,7 +406,7 @@ namespace TDSA.Test.Testes_Unitários.Services
 
         [Fact(DisplayName = "Não Deve Possuir Notificação")]
         [Trait("Services", "MedicoService Testes")]
-        public void MedicoService_Atualizar_NaoDevePossuirNoticacao()
+        public void MedicoService_OperacaoValida_NaoDevePossuirNoticacao()
         {
             //Arrange
             var mocker = new AutoMocker();
@@ -503,6 +537,83 @@ namespace TDSA.Test.Testes_Unitários.Services
 
             //Assert
             Assert.DoesNotContain(result, c => c.Especialidades.Select(n => n.Nome).Contains(especialidade));
+        }
+
+        [Fact(DisplayName = "Médico Deve Ser Removido")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_Remover_DeveSerRemovido()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
+                      .Returns(_medicoServiceTestsFixture.ObterPorId(medico));
+
+            mocker.GetMock<INotificador>().Setup(m => m.TemNotificacao())
+                      .Returns(_medicoServiceTestsFixture.OperacaoValida(false));
+            //Act
+            medicoService.Remover(medico.Id);
+
+            //Assert
+            mocker.GetMock<IMedicoRepository>().Verify(m => m.Remover(It.IsAny<Guid>()), Times.Once);
+            mocker.GetMock<IMedicoRepository>().Verify(m => m.SaveChanges(), Times.Once);
+            mocker.GetMock<INotificador>().Verify(m => m.NotificarErro(It.IsAny<string>()), Times.Never);
+            mocker.GetMock<INotificador>().Verify(m => m.NotificarErro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "Médico Não Deve Ser Removido Pelo Guid ser Vazio")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_Remover_NaoDeveSerRemovidoPeloGuidSerVazio()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoInvalido();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
+                      .Returns(_medicoServiceTestsFixture.ObterPorId(medico));
+
+            mocker.GetMock<INotificador>().Setup(m => m.TemNotificacao())
+                      .Returns(_medicoServiceTestsFixture.OperacaoValida(true));
+
+            //Act
+            medicoService.Remover(medico.Id);
+
+            //Assert
+            mocker.GetMock<INotificador>().Verify(m => m.NotificarErro(It.IsAny<string>()), Times.Once);
+            mocker.GetMock<INotificador>().Verify(m => m.NotificarErro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            mocker.GetMock<IMedicoRepository>().Verify(m => m.Remover(It.IsAny<Guid>()), Times.Never);
+            mocker.GetMock<IMedicoRepository>().Verify(m => m.SaveChanges(), Times.Never);
+        }
+
+        [Fact(DisplayName = "Médico Não Deve Ser Removido Por não Encontrar No Banco")]
+        [Trait("Services", "MedicoService Testes")]
+        public void MedicoService_Remover_NaoDeveSerRemovidoPorNaoEncontrarNoBanco()
+        {
+            //Arrange
+            var mocker = new AutoMocker();
+            var medicoService = mocker.CreateInstance<MedicoService>();
+
+            var medico = _medicoServiceTestsFixture.GerarMedicoValido();
+
+            mocker.GetMock<IMedicoRepository>().Setup(m => m.ObterPorId(medico.Id))
+                      .Returns(_medicoServiceTestsFixture.ObterPorId());
+
+            mocker.GetMock<INotificador>().Setup(m => m.TemNotificacao())
+                      .Returns(_medicoServiceTestsFixture.OperacaoValida(true));
+
+            //Act
+            medicoService.Remover(medico.Id);
+
+            //Assert
+            mocker.GetMock<INotificador>().Verify(m => m.NotificarErro(It.IsAny<string>()), Times.Never);
+            mocker.GetMock<INotificador>().Verify(m => m.NotificarErro(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            mocker.GetMock<IMedicoRepository>().Verify(m => m.Remover(It.IsAny<Guid>()), Times.Never);
+            mocker.GetMock<IMedicoRepository>().Verify(m => m.SaveChanges(), Times.Never);
         }
 
     }

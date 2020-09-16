@@ -40,7 +40,7 @@ namespace TDSA.Business.Validations.MedicoValidation
                 .WithMessage("{PropertyName} deve ter no mínimo uma especialidade!");
 
             RuleFor(x=>x.CPF)
-                .Must(CpfValidacao.Validar)
+                .Must(Cpf.ValidarCPF)
                 .WithMessage("{PropertyName} inválido!");
         }
 

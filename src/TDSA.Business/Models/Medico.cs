@@ -48,7 +48,7 @@ namespace TDSA.Business.Models
             if (string.IsNullOrEmpty(cpf?.Trim()))
                 throw new Exception("CPF inválido!");
 
-            if (!CpfValidacao.Validar(cpf.Trim()))
+            if (!Cpf.ValidarCPF(cpf.Trim()))
                 throw new Exception("CPF inválido!");
 
             CPF = cpf;

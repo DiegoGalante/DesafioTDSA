@@ -86,12 +86,30 @@ namespace TDSA.Test.Testes_Unitários.Fixture
 
 
 
-        public IEnumerable<Especialidade> GerarEspecialidades(int quantidade)
+        public ICollection<Especialidade> GerarEspecialidades(int quantidade)
         {
             var especialidades = new Faker<Especialidade>("pt_BR").CustomInstantiator((f) => new Especialidade(f.Random.Guid(),
-                                                                                                           f.Random.String(5, 'a', 'z')));
+                                                                                                               f.Random.String(5, 'a', 'z')));
 
             return especialidades.Generate(quantidade);
+        }
+
+        public ICollection<Especialidade> GerarEspecialidadesInvalidas(int quantidade)
+        {
+            var especialidades = new Faker<Especialidade>("pt_BR").CustomInstantiator((f) => new Especialidade(Guid.Empty,
+                                                                                                               string.Empty));
+
+            return especialidades.Generate(quantidade);
+        }
+
+        public ICollection<Especialidade> GerarEspecialidadesVariadas()
+        {
+            var especialidades = new List<Especialidade>();
+
+            especialidades.AddRange(GerarEspecialidades(50));
+            especialidades.AddRange(GerarEspecialidadesInvalidas(50));
+
+            return especialidades;
         }
 
         public Medico GerarMedicoInvalido()
@@ -99,7 +117,7 @@ namespace TDSA.Test.Testes_Unitários.Fixture
             var genero = new Faker().PickRandom<Name.Gender>();
 
             var cliente = new Faker<Medico>("pt_BR")
-                .CustomInstantiator((f) => new Medico(f.Random.Guid(),
+                .CustomInstantiator((f) => new Medico(Guid.Empty,
                                                       string.Empty,
                                                       f.Person.Cpf(true),
                                                       f.Random.String(10, 'a', 'z'),

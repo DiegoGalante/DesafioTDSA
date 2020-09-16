@@ -74,20 +74,23 @@ namespace TDSA.Business.Services
             return await _medicoRepository.ObterPorId(id);
         }
 
-        public async Task Remover(Guid id)
+        public void Remover(Guid id)
         {
             if (id == Guid.Empty)
-                _notificacador.NotificarErro("Id Inválido para remover!");
-
-            var medico = await _medicoRepository.ObterPorId(id);
-            if (medico == null)
-                _notificacador.NotificarErro("Remover", "Médico não encontrado ou já removido!");
-
-            if (!_notificacador.TemNotificacao())
             {
-                await _medicoRepository.Remover(id);
-                await _medicoRepository.SaveChanges();
+                _notificacador.NotificarErro("Id Inválido para remover!");
+                return;
             }
+
+            var medico = _medicoRepository.ObterPorId(id).Result;
+            if (medico == null)
+            {
+                _notificacador.NotificarErro("Remover", "Médico não encontrado ou já removido!");
+                return;
+            }
+
+            _medicoRepository.Remover(id).Wait();
+            _medicoRepository.SaveChanges().Wait();
         }
 
         public bool ValidarMedico(Medico medico)
