@@ -224,10 +224,10 @@ var assemblies = [
   {
     "name": "TDSA.Business",
     "classes": [
-      { "name": "TDSA.Business.Extensions.StringExtensions", "rp": "TDSA.Business_StringExtensions.html", "cl": 3, "ucl": 5, "cal": 8, "tl": 21, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
-      { "name": "TDSA.Business.Models.Entity", "rp": "TDSA.Business_Entity.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 17, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "TDSA.Business.Models.Especialidade", "rp": "TDSA.Business_Especialidade.html", "cl": 5, "ucl": 5, "cal": 10, "tl": 25, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "TDSA.Business.Models.Medico", "rp": "TDSA.Business_Medico.html", "cl": 46, "ucl": 3, "cal": 49, "tl": 82, "ct": "LineCoverage", "mc": "-", "cb": 24, "tb": 24, "lch": [], "bch": [], "hc": [] },
+      { "name": "TDSA.Business.Extensions.StringExtensions", "rp": "TDSA.Business_StringExtensions.html", "cl": 6, "ucl": 0, "cal": 6, "tl": 19, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
+      { "name": "TDSA.Business.Models.Entity", "rp": "TDSA.Business_Entity.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 16, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "TDSA.Business.Models.Especialidade", "rp": "TDSA.Business_Especialidade.html", "cl": 5, "ucl": 3, "cal": 8, "tl": 20, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "TDSA.Business.Models.Medico", "rp": "TDSA.Business_Medico.html", "cl": 46, "ucl": 1, "cal": 47, "tl": 80, "ct": "LineCoverage", "mc": "-", "cb": 16, "tb": 16, "lch": [], "bch": [], "hc": [] },
       { "name": "TDSA.Business.Notificacoes.Notificacao", "rp": "TDSA.Business_Notificacao.html", "cl": 11, "ucl": 0, "cal": 11, "tl": 19, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "TDSA.Business.Notificacoes.Notificador", "rp": "TDSA.Business_Notificador.html", "cl": 28, "ucl": 0, "cal": 28, "tl": 53, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "TDSA.Business.Services.MedicoService", "rp": "TDSA.Business_MedicoService.html", "cl": 103, "ucl": 0, "cal": 103, "tl": 198, "ct": "LineCoverage", "mc": "-", "cb": 36, "tb": 42, "lch": [], "bch": [], "hc": [] },

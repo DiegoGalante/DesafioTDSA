@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualBasic.CompilerServices;
 using System;
 using System.Collections.Generic;
+using TDSA.Business.Extensions;
 using TDSA.Business.Validations;
 
 namespace TDSA.Business.Models
@@ -12,10 +13,7 @@ namespace TDSA.Business.Models
         public string CRM { get; private set; }
         public ICollection<Especialidade> Especialidades { get; private set; }
 
-        private Medico() : base(Guid.Empty)
-        {
-
-        }
+        private Medico() : base(Guid.Empty) { }
         public Medico(Guid id, string nome, string cpf, string crm, ICollection<Especialidade> especialidades) : base(id)
         {
             Nome = nome;
@@ -26,7 +24,7 @@ namespace TDSA.Business.Models
 
         public void AtualizarNome(string nome)
         {
-            if (string.IsNullOrEmpty(nome?.Trim()))
+            if (nome.EhVazio())
                 throw new Exception("Nome é obrigatório!");
 
             if (nome.Length >= 255)
@@ -37,7 +35,7 @@ namespace TDSA.Business.Models
 
         public void AtualizarCRM(string crm)
         {
-            if (string.IsNullOrEmpty(crm?.Trim()))
+            if (crm.EhVazio())
                 throw new Exception("CRM é obrigatório!");
 
             CRM = crm;
@@ -45,7 +43,7 @@ namespace TDSA.Business.Models
 
         public void AtualizarCPF(string cpf)
         {
-            if (string.IsNullOrEmpty(cpf?.Trim()))
+            if (cpf.EhVazio())
                 throw new Exception("CPF inválido!");
 
             if (!CpfValidacao.Validar(cpf.Trim()))
@@ -62,7 +60,7 @@ namespace TDSA.Business.Models
             if (especialidade == null)
                 throw new Exception("Especialidade é obrigatória!");
 
-            if (string.IsNullOrEmpty(especialidade.Nome?.Trim()))
+            if (especialidade.Nome.EhVazio())
                 throw new Exception("Especialidade é obrigatória!");
 
             Especialidades.Add(especialidade);
