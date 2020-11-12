@@ -21,8 +21,34 @@ namespace TDSA.Test.Testes_Unitários.Extensions.StringExtensions
             strFormatado.Should().BeEquivalentTo(strTeste);
         }
 
-  
 
 
+        [Trait("Extensions", "Extensions Testes")]
+        [Theory(DisplayName = "StringExtension - EhVazio - Deve ser válido")]
+        [InlineData("238.677.850-9")]
+        [InlineData("238.677.850-900")]
+        [InlineData("assfe-cx]  ")]
+        [InlineData(" abc")]
+        [InlineData("1-a")]
+        public void Medico_EhVazio_CpfDeveSerValido(string str)
+        {
+            var resultado = str.EhVazio();
+
+            resultado.Should().BeFalse();
+        }
+
+
+
+        [Trait("Extensions", "Extensions Testes")]
+        [Theory(DisplayName = "StringExtension - EhVazio - Deve ser inválido")]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        public void Medico_EhVazio_CpfDeveSerInvalido(string str)
+        {
+            var resultado = str.EhVazio();
+
+            resultado.Should().BeTrue();
+        }
     }
 }

@@ -11,11 +11,9 @@ namespace TDSA.Business.Extensions
             return valor.Trim().ToLower();
         }
 
-        public static string RemoveDiacritics(this string text)
+        public static bool EhVazio(this string valor)
         {
-            return string.Concat(text.Normalize(NormalizationForm.FormD)
-                                     .Where(ch => CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark))
-                         .Normalize(NormalizationForm.FormC);
+            return string.IsNullOrEmpty(valor?.Trim());
         }
     }
 }

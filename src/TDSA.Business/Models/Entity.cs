@@ -12,6 +12,5 @@ namespace TDSA.Business.Models
             Id = id;
             DataCadastro = DateTime.UtcNow;
         }
-
     }
 }
